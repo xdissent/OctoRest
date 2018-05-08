@@ -598,3 +598,100 @@ class OctoClient:
             return self._post('/api/settings', json=settings, ret=True)
         else:
             return self._get('/api/settings')
+    
+    def timelapse_list(self, unrendered=None):
+        '''
+        Retrieve a list of timelapses and the current config.
+        Returns a timelase list in the response body.
+
+        Unrendered, if True also includes unrendered timelapse.
+        '''
+        if unrendered:
+            return self._get('/api/timelapse', params=unrendered)
+        return self._get('/api/timelapse')
+    
+    def delete_timelapse(self, filename):
+        '''
+        Delete the specified timelapse
+
+        Requires user rights
+        '''
+        self._delete('/api/timelapse/{}'.format(filename))
+    
+    def command_unrend_timelapse(self, name, command):
+        '''
+        Current only supports to render the unrendered timelapse 
+        name via the render command.
+
+        Requires user rights.
+
+        name - The name of the unrendered timelapse
+        command – The command to issue, currently only render is supported
+        '''
+        data = {'command': command}
+        return self._post('api/timelapse/unrendered/{}'.format(name), json=data)
+
+    # def change_timelapse_conf(self):
+    #     '''
+    #     Save a new timelapse configuration to use for the next print.
+    #     The configuration is expected as the request body.
+    #     Requires user rights.
+
+    #     TODO: setup timelapse configuration
+    #     '''
+    #     return self._post('api/timelapse/')
+    
+    def lst_slicers(self):
+        '''
+        Returns a list of all available slicing profiles for all 
+        registered slicers in the system.
+
+        Returns a 200 OK response with a Slicer list as the body
+        upon successful completion.
+        '''
+        return self._get('/api/slicing/')
+    
+    def lst_slicer_profiles(self, slicer):
+        '''
+        Returns a list of all available slicing profiles for
+        the requested slicer. Returns a 200 OK response with
+        a Profile list as the body upon successful completion.
+        '''
+        return self._get('/api/slicing/{}/profiles'.format(slicer))
+    
+    def get_slicer_profile(self, slicer, key):
+        '''
+        Retrieves the specified profile from the system.
+
+        Returns a 200 OK response with a full Profile as 
+        the body upon successful completion.
+        '''
+        return self._get('/api/slicing/{}/profiles/{}'.format(slicer, key))
+    
+    # def add_slicer_profile(self, slicer, key):
+    #     '''
+    #     Adds a new slicing profile for the given slicer to the system.
+    #     If the profile identified by key already exists, it will be overwritten.
+
+    #     Expects a Profile as body.
+
+    #     Returns a 201 Created and an abridged Profile in the body 
+    #     upon successful completion.
+
+    #     Requires admin rights.
+
+    #     TODO: Create a profile body to send
+    #     TODO: Make a OctoClient _put method
+    #     '''
+    #     return self._put('/api/slicing/{}/profiles/{}'.format(slicer, key))
+
+    def del_slicer_profile(self, slicer, key):
+        '''
+        Delete the slicing profile identified by key for the slicer slicer. 
+        If the profile doesn’t exist, the request will succeed anyway.
+
+        Requires admin rights.
+        '''
+        return self._delete('/api/slicing/{}/profiles/{}'.format(slicer, key))
+
+    
