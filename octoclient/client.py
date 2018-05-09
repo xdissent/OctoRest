@@ -183,6 +183,45 @@ class OctoClient:
             'print': print,
         }
         self._post('/api/files/{}'.format(location), json=data, ret=False)
+    
+    def slice(self, location, slicer='cura', select=False, print=False):
+        '''
+        Slices an STL file into GCODE. 
+        TODO: ADD GCODE, POSITION, PRINTERPROFILE, PROFILE, PROFILE.*
+        Note that this is an asynchronous operation that 
+        will take place in the background after the response 
+        has been sent back to the client.
+        '''
+        location = self._prepend_local(location)
+        data = {
+            'command': 'slice',
+            'slicer': slicer,
+            'select': select,
+            'print': print,
+        }
+        return self._post('/api/files/{}'.format(location), json=data, ret=False)
+    
+    def copy(self, location, dest):
+        '''
+        Copies the file or folder to a new destination on the same location
+        '''
+        location = self._prepend_local(location)
+        data = {
+            'command': 'copy',
+            'destination': dest,
+        }
+        return self._post('/api/files/{}'.format(location), json=data, ret=False)
+    
+    def move(self, location, dest):
+        '''
+        Moves the file or folder to a new destination on the same location
+        '''
+        location = self._prepend_local(location)
+        data = {
+            'command': 'move',
+            'destination': dest,
+        }
+        return self._post('/api/files/{}'.format(location), json=data, ret=False)
 
     def connection_info(self):
         '''
@@ -693,5 +732,35 @@ class OctoClient:
         Requires admin rights.
         '''
         return self._delete('/api/slicing/{}/profiles/{}'.format(slicer, key))
-
     
+    def printer_profiles(self):
+        '''
+        Retrieves a list of all configured printer profiles.
+        '''
+        return self._get('/api/printerprofiles')
+    
+    # def add_printer_profile(self):
+    #     '''
+    #     '''
+    #     return self._post('/api/printerprofiles')
+
+    def del_printer_profile(self, profile):
+        '''
+        Deletes an existing printer profile by its profile identifier.
+
+        If the profile to be deleted is the currently selected profile, 
+        a 409 Conflict will be returned.
+        '''
+        return self._delete('/api/printerprofiles/{}'.format(profile))
+    
+    def languages(self):
+        '''
+        Retrieves a list of installed language packs.
+        '''
+        return self._get('/api/languages')
+    
+    def del_language(self, locale, pack):
+        '''
+        Retrieves a list of installed language packs.
+        '''
+        return self._('/api/languages/{}/{}'.format(locale, pack))
