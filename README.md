@@ -112,5 +112,5 @@ Work in progress...
 * Util
     - Test paths or URLs
 * Wizard
-    - Retrieve additional data about registered wizards
-    - Finish wizards
+    - ~~Retrieve additional data about registered wizards~~
+    - ~~Finish wizards~~

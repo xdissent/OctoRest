@@ -666,7 +666,9 @@ class OctoClient:
         name - The name of the unrendered timelapse
         command – The command to issue, currently only render is supported
         '''
-        data = {'command': 'render'}
+        data = {
+            'command': 'render',
+        }
         return self._post('/api/timelapse/unrendered/{}'.format(name), json=data)
 
     # def change_timelapse_conf(self):
@@ -762,4 +764,30 @@ class OctoClient:
         '''
         Retrieves a list of installed language packs.
         '''
-        return self._('/api/languages/{}/{}'.format(locale, pack))
+        return self._delete('/api/languages/{}/{}'.format(locale, pack))
+    
+    def wizard(self):
+        '''    
+        Retrieves additional data about the registered wizards.
+
+        Returns a 200 OK with an object mapping wizard identifiers to wizard data entries.
+        '''
+        return self._get('/setup/wizard')
+
+    def finish_wizard(self, handled):
+        '''
+        Inform wizards that the wizard dialog has been finished.
+
+        Expects a JSON request body containing a property handled 
+        which holds a list of wizard identifiers which were handled 
+        (not skipped) in the wizard dialog.
+
+        Will call octoprint.plugin.WizardPlugin.on_wizard_finish() 
+        for all registered wizard plugins, supplying the information 
+        whether the wizard plugin’s identifier was within the list of 
+        handled wizards or not.
+        '''
+        data = {
+            'handled': handled,
+        }
+        return self._post('/setup/wizard', json=data)
