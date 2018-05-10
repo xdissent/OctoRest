@@ -4,7 +4,6 @@ from urllib import parse as urlparse
 
 import requests
 
-
 class OctoClient:
     '''
     Encapsulates communication with one OctoPrint instance
