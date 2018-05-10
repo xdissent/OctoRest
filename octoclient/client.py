@@ -144,6 +144,19 @@ class OctoClient:
                 yield (filename, f, mime)
         else:
             yield file + (mime,)
+    
+    def files_info(self, location, filename):
+        """
+        Retrieves the selected file’s or folder’s information.
+        If the file is unknown, a 404 Not Found is returned.
+        If the targeted path is a folder, by default only its direct children 
+        will be returned. If recursive is provided and set to true, all 
+        sub folders and their children will be returned too.
+        On success, a 200 OK is returned, with a file information item as 
+        the response body.
+        """
+        return self._get('/api/files/{}/{}'.format(location, filename))
+
 
     def upload(self, file, *, location='local',
                select=False, print=False, userdata=None):
@@ -183,13 +196,15 @@ class OctoClient:
         }
         self._post('/api/files/{}'.format(location), json=data, ret=False)
     
-    def slice(self, location, slicer='cura', select=False, print=False):
+    def slice(self, location, slicer='cura', gcode=None, printer_profile=None, 
+              profile=None, select=False, print=False):
         """
         Slices an STL file into GCODE. 
-        TODO: ADD GCODE, POSITION, PRINTERPROFILE, PROFILE, PROFILE.*
         Note that this is an asynchronous operation that 
         will take place in the background after the response 
         has been sent back to the client.
+
+        TODO: ADD POSITION, PROFILE.*
         """
         location = self._prepend_local(location)
         data = {
@@ -198,6 +213,12 @@ class OctoClient:
             'select': select,
             'print': print,
         }
+        if not gcode == None:
+            data['gcode'] = gcode
+        if not printer_profile == None:
+            data['printerProfile'] = printer_profile
+        if not profile == None:
+            data['profile'] = profile
         return self._post('/api/files/{}'.format(location), json=data, ret=False)
     
     def copy(self, location, dest):

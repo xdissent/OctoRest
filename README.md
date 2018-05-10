@@ -27,10 +27,10 @@ Work in progress...
     - ~~Retrieve all files~~
     - ~~Retrieve files from specific location~~
     - ~~Upload file or create folder~~
-    - Retrieve a specific file’s or folder’s information
+    - ~~Retrieve a specific file’s or folder’s information~~
     - Issue a file command
         - ~~Select~~
-        - Slice
+        - Slice (TODO: profile.* and position)
         - ~~Copy~~
         - ~~Move~~
     - ~~Delete file~~
