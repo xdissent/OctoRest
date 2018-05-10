@@ -837,6 +837,27 @@ class OctoClient:
         """
         return self._get('/api/languages')
     
+    def upload_language(self, file):
+        """
+        Uploads a new language pack to OctoPrint.
+        Other than most of the other requests on OctoPrint’s API which are
+        expected as JSON, this request is expected as 
+        Content-Type: multipart/form-data due to the included file upload.
+        To upload a file, the request body must contain the file form field 
+        with the contents and file name of the file to upload.
+        Only files with one of the extensions zip, tar.gz, tgz or tar will 
+        be processed, for other file extensions a 400 Bad Request will be returned.
+        Will return a list of installed language packs upon completion, 
+        as described in Retrieve installed language packs.
+
+        Parameters:
+            file – The language pack file to upload
+        """
+        with self._file_tuple(file) as file_tuple:
+            files = {'file': file_tuple}
+
+            return self._post('/api/languages', file=files)
+    
     def delete_language(self, locale, pack):
         """
         Retrieves a list of installed language packs.

@@ -14,8 +14,6 @@ Work in progress...
     - Session Keys
         - ~~Obtaining a temporary session key~~
         - ~~Verifying a temporary session key~~
-        - Creating the signature
-        - Testing your implementation
 * Connection handling
     - ~~Get connection settings~~
     - ~~Issue a connection command~~
@@ -45,7 +43,7 @@ Work in progress...
     - ~~Retrieve information about the current job~~
 * Languages
     - ~~Retrieve installed language packs~~
-    - Upload a language pack
+    - ~~Upload a language pack~~
     - ~~Delete a language pack~~
 * Log file management
 * Printer operations
