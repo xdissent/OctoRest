@@ -12,9 +12,8 @@ Work in progress...
 * ~~Version information~~
 * Apps
     - Session Keys
-        - Workflow
-        - Obtaining a temporary session key
-        - Verifying a temporary session key
+        - ~~Obtaining a temporary session key~~
+        - ~~Verifying a temporary session key~~
         - Creating the signature
         - Testing your implementation
 * Connection handling

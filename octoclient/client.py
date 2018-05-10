@@ -143,6 +143,23 @@ class OctoClient:
             return 'local/' + location
         return location
 
+    def tmp_session_key(self):
+        """
+        Retrieve a temporary session key with a minimum validity. 
+        It can only be used as a proper API key after having been verified.
+        Returns the temporary session key and the timestamp until it’s valid.
+        """
+        return self._get('/apps/auth')
+
+    def verify_tmp_session_key(self):
+        """
+        Verify a formerly retrieved temporary session key by providing 
+        credentials and a cryptographic signature over these credentials
+        and the temporary key.
+        Returns the now verified session key and the new validity.
+        """
+        return self._post('/apps/auth')
+
     def files(self, location=None):
         """
         Retrieve information regarding all files currently available and
