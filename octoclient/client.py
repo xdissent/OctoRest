@@ -666,8 +666,8 @@ class OctoClient:
         name - The name of the unrendered timelapse
         command – The command to issue, currently only render is supported
         '''
-        data = {'command': command}
-        return self._post('api/timelapse/unrendered/{}'.format(name), json=data)
+        data = {'command': 'render'}
+        return self._post('/api/timelapse/unrendered/{}'.format(name), json=data)
 
     # def change_timelapse_conf(self):
     #     '''

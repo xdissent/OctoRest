@@ -50,40 +50,53 @@ Work in progress...
     - ~~Delete a language pack~~
 * Log file management
 * Printer operations
-    - Retrieve the current printer state
-    - Issue a print head command
-    - Issue a tool command
-    - Retrieve the current tool state
-    - Issue a bed command
-    - Retrieve the current bed state
-    - Issue an SD command
-    - Retrieve the current SD state
-    - Send an arbitrary command to the printer
+    - ~~Retrieve the current printer state~~
+    - ~~Issue a print head command~~
+        - ~~Jog~~
+        - ~~Home~~
+        - ~~Feedrate~~
+    - ~~Issue a tool command~~
+        - ~~Target~~
+        - ~~Offset~~
+        - ~~Select~~
+        - ~~Extrude~~
+        - ~~Flowrate~~
+    - ~~Retrieve the current tool state~~
+    - ~~Issue a bed command~~
+        - ~~Target~~
+        - ~~Offset~~
+    - ~~Retrieve the current bed state~~
+    - ~~Issue an SD command~~
+        - ~~Init~~
+        - ~~Refresh~~
+        - ~~Release~~
+    - ~~Retrieve the current SD state~~
+    - ~~Send an arbitrary command to the printer~~
 * Printer profile operations
-    - Retrieve all printer profiles
+    - ~~Retrieve all printer profiles~~
     - Add a new printer profile
     - Update an existing printer profile
-    - Remove an existing printer profile
+    - ~~Remove an existing printer profile~~
 * Settings
-    - Retrieve current settings
-    - Save settings
+    - ~~Retrieve current settings~~
+    - ~~Save settings~~
     - Regenerate the system wide API key
-    
 * Slicing
-    - List All Slicers and Slicing Profiles
-    - List Slicing Profiles of a Specific Slicer
-    - Retrieve Specific Profile
+    - ~~List All Slicers and Slicing Profiles~~
+    - ~~List Slicing Profiles of a Specific Slicer~~
+    - ~~Retrieve Specific Profile~~
     - Add Slicing Profile
-    - Delete Slicing Profile
+    - ~~Delete Slicing Profile~~
 * System
     - List all registered system commands
     - List all registered system commands for a source
     - Execute a registered system command
 * Timelapse
-    - Retrieve a list of timelapses and the current config
-    - Delete a timelapse
-    - Issue a command for an unrendered timelapse
-    - Delete an unrendered timelapse
+    - ~~Retrieve a list of timelapses and the current config~~
+    - ~~Delete a timelapse~~
+    - ~~Issue a command for an unrendered timelapse~~
+        - ~~Render~~
+    - ~~Delete an unrendered timelapse~~
     - Change current timelapse config
 * User
     - Retrieve a list of users
@@ -101,8 +114,3 @@ Work in progress...
 * Wizard
     - Retrieve additional data about registered wizards
     - Finish wizards
-* Push updates
-* Common data model
-    - Printer related
-    - Job related
-    - File related
