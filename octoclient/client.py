@@ -766,6 +766,34 @@ class OctoClient:
         """
         return self._delete('/api/languages/{}/{}'.format(locale, pack))
 
+    def system_commands(self):
+        """
+        Retrieves all configured system commands.
+        A 200 OK with a List all response will be returned.
+        """
+        return self._get('/api/system/commands')
+    
+    def source_system_commands(self, source):
+        """
+        Retrieves the configured system commands for the specified source.
+        The response will contain a list of command definitions.
+        """
+        return self._get('/api/system/commands/{}'.format(source))
+
+    def execute_system_command(self, source, action):
+        """
+        Execute the system command action defined in source.
+        Example
+        Restart OctoPrint via the core system command restart 
+        (which is available if the server restart command is configured).
+
+        Parameters:
+            source – The source for which to list commands, 
+            currently either core or custom
+            action – The identifier of the command, action from its definition
+        """
+        return self._post('/api/system/commands/{}/{}'.format(source, action))
+
     def users(self):
         """
         Retrieves a list of all registered users in OctoPrint.

@@ -88,9 +88,9 @@ Work in progress...
     - Add Slicing Profile
     - ~~Delete Slicing Profile~~
 * System
-    - List all registered system commands
-    - List all registered system commands for a source
-    - Execute a registered system command
+    - ~~List all registered system commands~~
+    - ~~List all registered system commands for a source~~
+    - ~~Execute a registered system command~~
 * Timelapse
     - ~~Retrieve a list of timelapses and the current config~~
     - ~~Delete a timelapse~~
