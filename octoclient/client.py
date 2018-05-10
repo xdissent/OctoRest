@@ -5,16 +5,16 @@ from urllib import parse as urlparse
 import requests
 
 class OctoClient:
-    '''
+    """
     Encapsulates communication with one OctoPrint instance
-    '''
+    """
 
     def __init__(self, *, url=None, apikey=None, session=None):
-        '''
+        """
         Initialize the object with URL and API key
 
         If a session is provided, it will be used (mostly for testing)
-        '''
+        """
         if not url:
             raise TypeError('Required argument \'url\' not found or emtpy')
         if not apikey:
@@ -36,7 +36,7 @@ class OctoClient:
         self.version = self.version()
 
     def _get(self, path, params=None):
-        '''
+        """
         Perform HTTP GET on given path with the auth header
 
         Path shall be the ending part of the URL,
@@ -45,7 +45,7 @@ class OctoClient:
         Raises a RuntimeError when not 20x OK-ish
 
         Returns JSON decoded data
-        '''
+        """
         url = urlparse.urljoin(self.url, path)
         response = self.session.get(url, params=params)
         self._check_response(response)
@@ -53,7 +53,7 @@ class OctoClient:
         return response.json()
 
     def _post(self, path, data=None, files=None, json=None, ret=True):
-        '''
+        """
         Perform HTTP POST on given path with the auth header
 
         Path shall be the ending part of the URL,
@@ -62,7 +62,7 @@ class OctoClient:
         Raises a RuntimeError when not 20x OK-ish
 
         Returns JSON decoded data
-        '''
+        """
         url = urlparse.urljoin(self.url, path)
         response = self.session.post(url, data=data, files=files, json=json)
         self._check_response(response)
@@ -71,7 +71,7 @@ class OctoClient:
             return response.json()
 
     def _delete(self, path):
-        '''
+        """
         Perform HTTP DELETE on given path with the auth header
 
         Path shall be the ending part of the URL,
@@ -80,15 +80,15 @@ class OctoClient:
         Raises a RuntimeError when not 20x OK-ish
 
         Returns nothing
-        '''
+        """
         url = urlparse.urljoin(self.url, path)
         response = self.session.delete(url)
         self._check_response(response)
 
     def _check_response(self, response):
-        '''
+        """
         Make sure the response status code was 20x, raise otherwise
-        '''
+        """
         if not (200 <= response.status_code < 210):
             error = response.text
             msg = 'Reply for {} was not OK: {} ({})'
@@ -97,9 +97,9 @@ class OctoClient:
         return response
 
     def version(self):
-        '''
+        """
         Retrieve information regarding server and API version
-        '''
+        """
         return self._get('/api/version')
 
     def _prepend_local(self, location):
@@ -108,7 +108,7 @@ class OctoClient:
         return location
 
     def files(self, location=None):
-        '''
+        """
         Retrieve information regarding all files currently available and
         regarding the disk space still available locally in the system
 
@@ -118,7 +118,7 @@ class OctoClient:
         system
 
         If location is a file, retrieves the selected file''s information
-        '''
+        """
         if location:
             location = self._prepend_local(location)
             return self._get('/api/files/{}'.format(location))
@@ -126,11 +126,11 @@ class OctoClient:
 
     @contextmanager
     def _file_tuple(self, file):
-        '''
+        """
         Yields a tuple with filename and file object
 
         Expects the same thing or a path as input
-        '''
+        """
         mime = 'application/octet-stream'
 
         try:
@@ -147,10 +147,10 @@ class OctoClient:
 
     def upload(self, file, *, location='local',
                select=False, print=False, userdata=None):
-        '''
+        """
         Upload a given file
         It can be a path or a tuple with a filename and a file-like object
-        '''
+        """
         with self._file_tuple(file) as file_tuple:
             files = {'file': file_tuple}
             data = {'select': str(select).lower(), 'print': str(print).lower()}
@@ -161,21 +161,21 @@ class OctoClient:
                               files=files, data=data)
 
     def delete(self, location):
-        '''
+        """
         Delete the selected filename on the selected target
 
         Location is target/filename, defaults to local/filename
-        '''
+        """
         location = self._prepend_local(location)
         self._delete('/api/files/{}'.format(location))
 
     def select(self, location, *, print=False):
-        '''
+        """
         Selects a file for printing
 
         Location is target/filename, defaults to local/filename
         If print is True, the selected file starts to print immediately
-        '''
+        """
         location = self._prepend_local(location)
         data = {
             'command': 'select',
@@ -184,13 +184,13 @@ class OctoClient:
         self._post('/api/files/{}'.format(location), json=data, ret=False)
     
     def slice(self, location, slicer='cura', select=False, print=False):
-        '''
+        """
         Slices an STL file into GCODE. 
         TODO: ADD GCODE, POSITION, PRINTERPROFILE, PROFILE, PROFILE.*
         Note that this is an asynchronous operation that 
         will take place in the background after the response 
         has been sent back to the client.
-        '''
+        """
         location = self._prepend_local(location)
         data = {
             'command': 'slice',
@@ -201,9 +201,9 @@ class OctoClient:
         return self._post('/api/files/{}'.format(location), json=data, ret=False)
     
     def copy(self, location, dest):
-        '''
+        """
         Copies the file or folder to a new destination on the same location
-        '''
+        """
         location = self._prepend_local(location)
         data = {
             'command': 'copy',
@@ -212,9 +212,9 @@ class OctoClient:
         return self._post('/api/files/{}'.format(location), json=data, ret=False)
     
     def move(self, location, dest):
-        '''
+        """
         Moves the file or folder to a new destination on the same location
-        '''
+        """
         location = self._prepend_local(location)
         data = {
             'command': 'move',
@@ -223,22 +223,22 @@ class OctoClient:
         return self._post('/api/files/{}'.format(location), json=data, ret=False)
 
     def connection_info(self):
-        '''
+        """
         Retrieve the current connection settings, including information
         regarding the available baudrates and serial ports and the
         current connection state.
-        '''
+        """
         return self._get('/api/connection')
 
     def state(self):
-        '''
+        """
         A shortcut to get the current state.
-        '''
+        """
         return self.connection_info()['current']['state']
 
     def connect(self, *, port=None, baudrate=None,
                 printer_profile=None, save=None, autoconnect=None):
-        '''
+        """
         Instructs OctoPrint to connect to the printer
 
         port: Optional, specific port to connect to. If not set the current
@@ -259,7 +259,7 @@ class OctoClient:
         autoconnect: Optional, whether to automatically connect to the printer
         on OctoPrint's startup in the future. If not set no changes will be
         made to the current configuration.
-        '''
+        """
         data = {'command': 'connect'}
         if port is not None:
             data['port'] = port
@@ -274,84 +274,84 @@ class OctoClient:
         self._post('/api/connection', json=data, ret=False)
 
     def disconnect(self):
-        '''
+        """
         Instructs OctoPrint to disconnect from the printer
-        '''
+        """
         data = {'command': 'disconnect'}
         self._post('/api/connection', json=data, ret=False)
 
     def fake_ack(self):
-        '''
+        """
         Fakes an acknowledgment message for OctoPrint in case one got lost on
         the serial line and the communication with the printer since stalled.
         This should only be used in "emergencies" (e.g. to save prints), the
         reason for the lost acknowledgment should always be properly
         investigated and removed instead of depending on this "symptom solver".
-        '''
+        """
         data = {'command': 'fake_ack'}
         self._post('/api/connection', json=data, ret=False)
 
     def job_info(self):
-        '''
+        """
         Retrieve information about the current job (if there is one)
-        '''
+        """
         return self._get('/api/job')
 
     def print(self):
-        '''
+        """
         Starts the print of the currently selected file
 
         Use select() to select a file
-        '''
+        """
         data = {'command': 'start'}
         self._post('/api/job', json=data, ret=False)
 
     def pause(self):
-        '''
+        """
         Pauses/unpauses the current print job
 
         There must be an active print job for this to work
-        '''
+        """
         data = {'command': 'pause'}
         self._post('/api/job', json=data, ret=False)
 
     def restart(self):
-        '''
+        """
         Restart the print of the currently selected file from the beginning
 
         There must be an active print job for this to work and the print job
         must currently be paused
-        '''
+        """
         data = {'command': 'restart'}
         self._post('/api/job', json=data, ret=False)
 
     def cancel(self):
-        '''
+        """
         Cancels the current print job
 
         There must be an active print job for this to work
-        '''
+        """
         data = {'command': 'cancel'}
         self._post('/api/job', json=data, ret=False)
 
     def logs(self):
-        '''
+        """
         Retrieve information regarding all log files currently available
         and regarding the disk space still available in the system on the
         location the log files are being stored
-        '''
+        """
         return self._get('/api/logs')
 
     def delete_log(self, filename):
-        '''
+        """
         Delete the selected log file with name filename
-        '''
+        """
         self._delete('/api/logs/{}'.format(filename))
 
     def _hwinfo(self, url, **kwargs):
-        '''
+        """
         Helper method for printer(), tool(), bed() and sd()
-        '''
+        """
         params = {}
         if kwargs.get('exclude'):
             params['exclude'] = ','.join(kwargs['exclude'])
@@ -362,7 +362,7 @@ class OctoClient:
         return self._get(url, params=params)
 
     def printer(self, *, exclude=None, history=False, limit=None):
-        '''
+        """
         Retrieves the current state of the printer
 
         Returned information includes:
@@ -378,12 +378,12 @@ class OctoClient:
 
         Clients can specify a list of attributes to not return in the response
         (e.g. if they don't need it) via the exclude argument.
-        '''
+        """
         return self._hwinfo('/api/printer', exclude=exclude,
                             history=history, limit=limit)
 
     def tool(self, *, history=False, limit=None):
-        '''
+        """
         Retrieves the current temperature data (actual, target and offset) plus
         optionally a (limited) history (actual, target, timestamp) for all of
         the printer's available tools.
@@ -391,12 +391,12 @@ class OctoClient:
         It's also possible to retrieve the temperature history by setting the
         history argument. The amount of returned history data points can be
         limited using the limit argument.
-        '''
+        """
         return self._hwinfo('/api/printer/tool',
                             history=history, limit=limit)
 
     def bed(self, *, history=False, limit=None):
-        '''
+        """
         Retrieves the current temperature data (actual, target and offset) plus
         optionally a (limited) history (actual, target, timestamp) for the
         printer's heated bed.
@@ -404,24 +404,24 @@ class OctoClient:
         It's also possible to retrieve the temperature history by setting the
         history argument. The amount of returned history data points can be
         limited using the limit argument.
-        '''
+        """
         return self._hwinfo('/api/printer/bed',
                             history=history, limit=limit)
 
     def home(self, axes=None):
-        '''
+        """
         Homes the print head in all of the given axes.
         Additional parameters are:
 
         axes: A list of axes which to home, valid values are one or more of
         'x', 'y', 'z'. Defaults to all.
-        '''
+        """
         axes = [a.lower()[:1] for a in axes] if axes else ['x', 'y', 'z']
         data = {'command': 'home', 'axes': axes}
         self._post('/api/printer/printhead', json=data, ret=False)
 
     def jog(self, x=None, y=None, z=None):
-        '''
+        """
         Jogs the print head (relatively) by a defined amount in one or more
         axes. Additional parameters are:
 
@@ -433,7 +433,7 @@ class OctoClient:
 
         z: Optional. Amount to jog print head on z axis, must be a valid
         number corresponding to the distance to travel in mm.
-        '''
+        """
         data = {'command': 'jog'}
         if x:
             data['x'] = x
@@ -444,12 +444,12 @@ class OctoClient:
         self._post('/api/printer/printhead', json=data, ret=False)
 
     def feedrate(self, factor):
-        '''
+        """
         Changes the feedrate factor to apply to the movement's of the axes.
 
         factor: The new factor, percentage as integer or float (percentage
         divided by 100) between 50 and 200%.
-        '''
+        """
         data = {'command': 'feedrate', 'factor': factor}
         self._post('/api/printer/printhead', json=data, ret=False)
 
@@ -466,7 +466,7 @@ class OctoClient:
         return ret
 
     def tool_target(self, targets):
-        '''
+        """
         Sets the given target temperature on the printer's tools.
         Additional parameters:
 
@@ -474,13 +474,13 @@ class OctoClient:
         Can be one number (for tool0), list of numbers or dict, where keys
         must match the format tool{n} with n being the tool's index starting
         with 0.
-        '''
+        """
         targets = self._tool_dict(targets)
         data = {'command': 'target', 'targets': targets}
         self._post('/api/printer/tool', json=data, ret=False)
 
     def tool_offset(self, offsets):
-        '''
+        """
         Sets the given temperature offset on the printer's tools.
         Additional parameters:
 
@@ -488,77 +488,77 @@ class OctoClient:
         Can be one number (for tool0), list of numbers or dict, where keys
         must match the format tool{n} with n being the tool's index starting
         with 0.
-        '''
+        """
         offsets = self._tool_dict(offsets)
         data = {'command': 'offset', 'offsets': offsets}
         self._post('/api/printer/tool', json=data, ret=False)
 
     def tool_select(self, tool):
-        '''
+        """
         Selects the printer's current tool.
         Additional parameters:
 
         tool: Tool to select, format tool{n} with n being the tool's index
         starting with 0. Or integer.
-        '''
+        """
         if isinstance(tool, int):
             tool = 'tool{}'.format(tool)
         data = {'command': 'select', 'tool': tool}
         self._post('/api/printer/tool', json=data, ret=False)
 
     def extrude(self, amount):
-        '''
+        """
         Extrudes the given amount of filament from the currently selected tool
 
         Additional parameters:
 
         amount: The amount of filament to extrude in mm.
         May be negative to retract.
-        '''
+        """
         data = {'command': 'extrude', 'amount': amount}
         self._post('/api/printer/tool', json=data, ret=False)
 
     def retract(self, amount):
-        '''
+        """
         Retracts the given amount of filament from the currently selected tool
 
         Additional parameters:
 
         amount: The amount of filament to retract in mm.
         May be negative to extrude.
-        '''
+        """
         self.extrude(-amount)
 
     def flowrate(self, factor):
-        '''
+        """
         Changes the flow rate factor to apply to extrusion of the tool.
 
         factor: The new factor, percentage as integer or float
         (percentage divided by 100) between 75 and 125%.
-        '''
+        """
         data = {'command': 'flowrate', 'factor': factor}
         self._post('/api/printer/tool', json=data, ret=False)
 
     def bed_target(self, target):
-        '''
+        """
         Sets the given target temperature on the printer's bed.
 
         target: Target temperature to set.
-        '''
+        """
         data = {'command': 'target', 'target': target}
         self._post('/api/printer/bed', json=data, ret=False)
 
     def bed_offset(self, offset):
-        '''
+        """
         Sets the given temperature offset on the printer's bed.
 
         offset: Temperature offset to set.
-        '''
+        """
         data = {'command': 'offset', 'offset': offset}
         self._post('/api/printer/bed', json=data, ret=False)
 
     def sd_init(self):
-        '''
+        """
         Initializes the printer's SD card, making it available for use.
         This also includes an initial retrieval of the list of files currently
         stored on the SD card, so after issuing files(location=sd) a retrieval
@@ -566,48 +566,48 @@ class OctoClient:
 
         If OctoPrint detects the availability of a SD card on the printer
         during connection, it will automatically attempt to initialize it.
-        '''
+        """
         data = {'command': 'init'}
         self._post('/api/printer/sd', json=data, ret=False)
 
     def sd_refresh(self):
-        '''
+        """
         Refreshes the list of files stored on the printer''s SD card.
         Will raise a 409 Conflict if the card has not been initialized yet
         with sd_init().
-        '''
+        """
         data = {'command': 'refresh'}
         self._post('/api/printer/sd', json=data, ret=False)
 
     def sd_release(self):
-        '''
+        """
         Releases the SD card from the printer. The reverse operation to init.
         After issuing this command, the SD card won't be available anymore,
         hence and operations targeting files stored on it will fail.
         Will raise a 409 Conflict if the card has not been initialized yet
         with sd_init().
-        '''
+        """
         data = {'command': 'release'}
         self._post('/api/printer/sd', json=data, ret=False)
 
     def sd(self):
-        '''
+        """
         Retrieves the current state of the printer's SD card.
 
         If SD support has been disabled in OctoPrint's settings,
         a 404 Not Found is risen.
-        '''
+        """
         return self._get('/api/printer/sd')
 
     def gcode(self, command):
-        '''
+        """
         Sends any command to the printer via the serial interface.
         Should be used with some care as some commands can interfere with or
         even stop a running print job.
 
         command: A single string command or command separated by newlines
         or a list of commands
-        '''
+        """
         try:
             commands = command.split('\n')
         except AttributeError:
@@ -617,7 +617,7 @@ class OctoClient:
         self._post('/api/printer/command', json=data, ret=False)
 
     def settings(self, settings=None):
-        '''
+        """
         Retrieves the current configuration of printer
         python dict format if argument settings is not given
 
@@ -631,33 +631,33 @@ class OctoClient:
         Data model described:
         http://docs.octoprint.org/en/master/api/settings.html#data-model
         http://docs.octoprint.org/en/master/configuration/config_yaml.html#config-yaml
-        '''
+        """
         if settings:
             return self._post('/api/settings', json=settings, ret=True)
         else:
             return self._get('/api/settings')
     
     def timelapse_list(self, unrendered=None):
-        '''
+        """
         Retrieve a list of timelapses and the current config.
         Returns a timelase list in the response body.
 
         Unrendered, if True also includes unrendered timelapse.
-        '''
+        """
         if unrendered:
             return self._get('/api/timelapse', params=unrendered)
         return self._get('/api/timelapse')
     
     def delete_timelapse(self, filename):
-        '''
+        """
         Delete the specified timelapse
 
         Requires user rights
-        '''
+        """
         self._delete('/api/timelapse/{}'.format(filename))
     
     def command_unrend_timelapse(self, name, command):
-        '''
+        """
         Current only supports to render the unrendered timelapse 
         name via the render command.
 
@@ -665,51 +665,51 @@ class OctoClient:
 
         name - The name of the unrendered timelapse
         command – The command to issue, currently only render is supported
-        '''
+        """
         data = {
             'command': 'render',
         }
         return self._post('/api/timelapse/unrendered/{}'.format(name), json=data)
 
     # def change_timelapse_conf(self):
-    #     '''
+    #     """
     #     Save a new timelapse configuration to use for the next print.
     #     The configuration is expected as the request body.
     #     Requires user rights.
 
     #     TODO: setup timelapse configuration
-    #     '''
+    #     """
     #     return self._post('api/timelapse/')
     
     def lst_slicers(self):
-        '''
+        """
         Returns a list of all available slicing profiles for all 
         registered slicers in the system.
 
         Returns a 200 OK response with a Slicer list as the body
         upon successful completion.
-        '''
+        """
         return self._get('/api/slicing/')
     
     def lst_slicer_profiles(self, slicer):
-        '''
+        """
         Returns a list of all available slicing profiles for
         the requested slicer. Returns a 200 OK response with
         a Profile list as the body upon successful completion.
-        '''
+        """
         return self._get('/api/slicing/{}/profiles'.format(slicer))
     
     def get_slicer_profile(self, slicer, key):
-        '''
+        """
         Retrieves the specified profile from the system.
 
         Returns a 200 OK response with a full Profile as 
         the body upon successful completion.
-        '''
+        """
         return self._get('/api/slicing/{}/profiles/{}'.format(slicer, key))
     
     # def add_slicer_profile(self, slicer, key):
-    #     '''
+    #     """
     #     Adds a new slicing profile for the given slicer to the system.
     #     If the profile identified by key already exists, it will be overwritten.
 
@@ -722,60 +722,147 @@ class OctoClient:
 
     #     TODO: Create a profile body to send
     #     TODO: Make a OctoClient _put method
-    #     '''
+    #     """
     #     return self._put('/api/slicing/{}/profiles/{}'.format(slicer, key))
 
-    def del_slicer_profile(self, slicer, key):
-        '''
+    def delete_slicer_profile(self, slicer, key):
+        """
         Delete the slicing profile identified by key for the slicer slicer. 
         If the profile doesn’t exist, the request will succeed anyway.
 
         Requires admin rights.
-        '''
+        """
         return self._delete('/api/slicing/{}/profiles/{}'.format(slicer, key))
     
     def printer_profiles(self):
-        '''
+        """
         Retrieves a list of all configured printer profiles.
-        '''
+        """
         return self._get('/api/printerprofiles')
     
     # def add_printer_profile(self):
-    #     '''
-    #     '''
+    #     """
+    #     """
     #     return self._post('/api/printerprofiles')
 
-    def del_printer_profile(self, profile):
-        '''
+    def delete_printer_profile(self, profile):
+        """
         Deletes an existing printer profile by its profile identifier.
 
         If the profile to be deleted is the currently selected profile, 
         a 409 Conflict will be returned.
-        '''
+        """
         return self._delete('/api/printerprofiles/{}'.format(profile))
     
     def languages(self):
-        '''
+        """
         Retrieves a list of installed language packs.
-        '''
+        """
         return self._get('/api/languages')
     
-    def del_language(self, locale, pack):
-        '''
+    def delete_language(self, locale, pack):
+        """
         Retrieves a list of installed language packs.
-        '''
+        """
         return self._delete('/api/languages/{}/{}'.format(locale, pack))
+
+    def users(self):
+        """
+        Retrieves a list of all registered users in OctoPrint.
+
+        Will return a 200 OK with a user list response as body.
+
+        Requires admin rights.
+        """
+        return self._get('/api/users')
+    
+    def user(self, username):
+        """
+        Retrieves information about a user.
+
+        Will return a 200 OK with a user record as body.
+
+        Requires either admin rights or to be logged in as the user.
+        """
+        return self._get('/api/users/{}'.format(username))
+    
+    def add_user(self, name, password, active=False, admin=False):
+        """
+        Adds a user to OctoPrint.
+        Expects a user registration request as request body.
+        Returns a list of registered users on success, see Retrieve a list of users.
+        Requires admin rights.
+
+        JSON Params:
+            name – The user’s name
+            password – The user’s password
+            active – Whether to activate the account (true) or not (false)
+            admin – Whether to give the account admin rights (true) or not (false)
+        """
+        data = {
+            'name': name,
+            'password': password,
+            'active': active,
+            'admin', admin,
+        }
+        return self._post('/api/users', json=data)
+    
+    def delete_user(self, username):
+        """
+        Delete a user record.
+        Returns a list of registered users on success, see Retrieve a list of users.
+        Requires admin rights.
+
+        Parameters:
+            username – Name of the user to delete
+        """
+        return self._delete('/api/users/{}'.format(username))
+
+    def user_settings(self, username):
+        """
+        Retrieves a user’s settings.
+        Will return a 200 OK with a JSON object representing the user’s 
+        personal settings (if any) as body.
+        Requires admin rights or to be logged in as the user.
+
+        Parameters:
+            username - Name of the user to retrieve the settings for
+        """
+        return self._get('/api/users/{}/settings'.format(username))
+    
+    def regen_user_apikey(self, username):
+        """
+        Generates a new API key for the user.
+        Does not expect a body. Will return the generated API key as apikey 
+        property in the JSON object contained in the response body.
+        Requires admin rights or to be logged in as the user.
+
+        Parameters:
+            username – Name of the user to retrieve the settings for
+        """
+        return self._post('/api/users/{}/apikey'.format(username))
+    
+    def delete_user_apikey(self, username):
+        """
+        Deletes a user’s personal API key.
+        Requires admin rights or to be logged in as the user.
+
+        Parameters:
+            username – Name of the user to retrieve the settings for
+        """
+        return self._delete('/api/users/{}/apikey'.format(username))
     
     def wizard(self):
-        '''    
+        """    
         Retrieves additional data about the registered wizards.
 
-        Returns a 200 OK with an object mapping wizard identifiers to wizard data entries.
-        '''
+        Returns a 200 OK with an object mapping wizard identifiers to wizard 
+        data entries.
+        """
         return self._get('/setup/wizard')
 
     def finish_wizard(self, handled):
-        '''
+        """
         Inform wizards that the wizard dialog has been finished.
 
         Expects a JSON request body containing a property handled 
@@ -786,7 +873,7 @@ class OctoClient:
         for all registered wizard plugins, supplying the information 
         whether the wizard plugin’s identifier was within the list of 
         handled wizards or not.
-        '''
+        """
         data = {
             'handled': handled,
         }
