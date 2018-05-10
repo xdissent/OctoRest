@@ -745,15 +745,18 @@ class OctoClient:
         }
         return self._post('/api/timelapse/unrendered/{}'.format(name), json=data)
 
-    # def change_timelapse_conf(self):
-    #     """
-    #     Save a new timelapse configuration to use for the next print.
-    #     The configuration is expected as the request body.
-    #     Requires user rights.
+    def change_timelapse_conf(self, type):
+        """
+        Save a new timelapse configuration to use for the next print.
+        The configuration is expected as the request body.
+        Requires user rights.
 
-    #     TODO: setup timelapse configuration
-    #     """
-    #     return self._post('api/timelapse/')
+        TODO: setup timelapse configuration
+        """
+        data = {
+            'type': type,
+        }
+        return self._post('/api/timelapse', json=data)
     
     def lst_slicers(self):
         """
@@ -871,9 +874,7 @@ class OctoClient:
     def users(self):
         """
         Retrieves a list of all registered users in OctoPrint.
-
         Will return a 200 OK with a user list response as body.
-
         Requires admin rights.
         """
         return self._get('/api/users')
@@ -881,10 +882,11 @@ class OctoClient:
     def user(self, username):
         """
         Retrieves information about a user.
-
         Will return a 200 OK with a user record as body.
-
         Requires either admin rights or to be logged in as the user.
+
+        Parameters:
+            username – Name of the user which to retrieve
         """
         return self._get('/api/users/{}'.format(username))
     
@@ -909,6 +911,37 @@ class OctoClient:
         }
         return self._post('/api/users', json=data)
     
+    def update_user(self, username, admin=None, active=None):
+        """
+        Updates a user record.
+        Expects a user update request as request body.
+        Returns a list of registered users on success, see Retrieve a list of users.
+        Requires admin rights.
+
+        Parameters:
+            username – Name of the user to update
+        
+        JSON Params:
+            admin – Whether to mark the user as admin (true) or not (false), can be left out (no change)
+            active – Whether to mark the account as activated (true) or deactivated (false), can be left out (no change)
+        """
+        if admin == None and active == None:
+            return self._put('/api/users/{}'.format(username))
+        if not admin == None:
+            data = {
+                'admin': admin,
+            }
+        if not active == None:
+            data = {
+                'active': active,
+            }
+        if not active == None and not admin == None:
+            data = {
+                'active': active,
+                'admin': admin,
+            }
+        return self._put('/api/users/{}'.format(username), json=data)
+    
     def delete_user(self, username):
         """
         Delete a user record.
@@ -919,6 +952,23 @@ class OctoClient:
             username – Name of the user to delete
         """
         return self._delete('/api/users/{}'.format(username))
+    
+    def rst_user_password(self, username, password):
+        """
+        Changes the password of a user.
+        Expects a JSON object with a single property password as request body.
+        Requires admin rights or to be logged in as the user.
+
+        Parameters:
+            username – Name of the user to change the password for
+        
+        JSON Params:
+            password – The new password to set
+        """
+        data = {
+            'password': password,
+        }
+        return self._put('/api/users/{}/password'.format(username), json=data)
 
     def user_settings(self, username):
         """

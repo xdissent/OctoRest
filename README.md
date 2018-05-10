@@ -96,14 +96,14 @@ Work in progress...
     - ~~Issue a command for an unrendered timelapse~~
         - ~~Render~~
     - ~~Delete an unrendered timelapse~~
-    - Change current timelapse config
+    - ~~Change current timelapse config~~
 * User
     - ~~Retrieve a list of users~~
     - ~~Retrieve a user~~
     - ~~Add a user~~
-    - Update a user
+    - ~~Update a user~~
     - ~~Delete a user~~
-    - Reset a user’s password
+    - ~~Reset a user’s password~~
     - ~~Retrieve a user’s settings~~
     - Update a user’s settings
     - ~~Regenerate a user’s personal API key~~
