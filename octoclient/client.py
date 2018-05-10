@@ -84,6 +84,42 @@ class OctoClient:
         url = urlparse.urljoin(self.url, path)
         response = self.session.delete(url)
         self._check_response(response)
+    
+    def _put(self, path, data=None, files=None, json=None, ret=True):
+        """
+        Perform HTTP PUT on given path with the auth header
+
+        Path shall be the ending part of the URL,
+        i.e. it should not be full URL
+
+        Raises a RuntimeError when not 20x OK-ish
+
+        Returns JSON decoded data
+        """
+        url = urlparse.urljoin(self.url, path)
+        response = self.session.put(url, data=data, files=files, json=json)
+        self._check_response(response)
+
+        if ret:
+            return response.json()
+
+    def _patch(self, path, data=None, files=None, json=None, ret=True):
+        """
+        Perform HTTP PATCH on given path with the auth header
+
+        Path shall be the ending part of the URL,
+        i.e. it should not be full URL
+
+        Raises a RuntimeError when not 20x OK-ish
+
+        Returns JSON decoded data
+        """
+        url = urlparse.urljoin(self.url, path)
+        response = self.session.patch(url, data=data, files=files, json=json)
+        self._check_response(response)
+
+        if ret:
+            return response.json()
 
     def _check_response(self, response):
         """
