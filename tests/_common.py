@@ -4,7 +4,7 @@ from betamax import Betamax
 from betamax_serializers import pretty_json
 
 
-URL = 'http://printer15.local'
+URL = 'http://octopi.local'
 APIKEY = 'YouShallNotPass'
 
 

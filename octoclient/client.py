@@ -856,7 +856,7 @@ class OctoClient:
         with self._file_tuple(file) as file_tuple:
             files = {'file': file_tuple}
 
-            return self._post('/api/languages', file=files)
+            return self._post('/api/languages', files=files)
     
     def delete_language(self, locale, pack):
         """
@@ -928,7 +928,7 @@ class OctoClient:
             'name': name,
             'password': password,
             'active': active,
-            'admin', admin,
+            'admin': admin,
         }
         return self._post('/api/users', json=data)
     
