@@ -3,10 +3,28 @@ import os
 from itertools import chain, combinations
 
 import pytest
+import os
 
 from octoclient import OctoClient
 
-from _common import URL, APIKEY
+from betamax import Betamax
+from betamax_serializers import pretty_json
+
+
+URL = 'http://octopi.local'
+APIKEY = 'YouShallNotPass'
+
+
+with Betamax.configure() as config:
+    config.cassette_library_dir = 'tests/fixtures/cassettes'
+    record_mode = os.environ.get('RECORD', 'none')
+    config.default_cassette_options['record_mode'] = record_mode
+    config.default_cassette_options['match_requests_on'] = {
+        'uri',
+        'method',
+    }
+    Betamax.register_serializer(pretty_json.PrettyJSONSerializer)
+    config.default_cassette_options['serialize_with'] = 'prettyjson'
 
 
 def sleep(seconds):
@@ -374,8 +392,8 @@ class TestClient:
         users = client.users()
         print(users)
 
-c = OctoClient(url=URL, apikey=APIKEY)
-print(c.version)
-t = TestClient()
-t.test_tmp_session_key(c)
-t.test_users(c)
+# c = OctoClient(url=URL, apikey=APIKEY)
+# print(c.version)
+# t = TestClient()
+# t.test_tmp_session_key(c)
+# t.test_users(c)
