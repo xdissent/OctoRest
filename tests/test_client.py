@@ -50,10 +50,10 @@ def zero(component):
     return 'tool0' if component == 'tool' else component
 
 
-@pytest.mark.usefixtures('betamax_session')
+# @pytest.mark.usefixtures('betamax_session')
 @pytest.fixture
-def client(betamax_session):
-    return OctoClient(url=URL, apikey=APIKEY, session=betamax_session)
+def client():
+    return OctoClient(url=URL, apikey=APIKEY, session=None)
 
 
 @pytest.fixture
@@ -68,14 +68,16 @@ def gcode():
 
 class TestClient:
     @pytest.mark.usefixtures('betamax_session')
-    def test_init_works_with_good_auth(self, betamax_session):
+    # @pytest.fixture
+    def test_init_works_with_good_auth(self):
         # Should not raise anything
-        OctoClient(url=URL, apikey=APIKEY, session=betamax_session)
+        OctoClient(url=URL, apikey=APIKEY)
 
     @pytest.mark.usefixtures('betamax_session')
-    def test_init_raises_with_bad_auth(self, betamax_session):
+    # @pytest.fixture
+    def test_init_raises_with_bad_auth(self):
         with pytest.raises(RuntimeError):
-            OctoClient(url=URL, apikey='nope', session=betamax_session)
+            OctoClient(url=URL, apikey='nope')
 
     def test_files_contains_files_and_free_space_info(self, client):
         files = client.files()
@@ -392,16 +394,8 @@ class TestClient:
         users = client.users()
         print(users)
 
-<<<<<<< HEAD
 # c = OctoClient(url=URL, apikey=APIKEY)
 # print(c.version)
 # t = TestClient()
 # t.test_tmp_session_key(c)
 # t.test_users(c)
-=======
-c = OctoClient(url=URL, apikey=APIKEY)
-print(c.version)
-t = TestClient()
-t.test_tmp_session_key(c)
-t.test_users(c)
->>>>>>> 5df6c7227d94f58e0abd824d498694fdcbb7ddd0
