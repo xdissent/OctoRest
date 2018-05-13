@@ -365,3 +365,17 @@ class TestClient:
         new_settings = client.settings(test_name)
         assert new_settings['appearance']['name'] == "Test"
         client.settings({'appearance': {'name': printer_name}})
+    
+    def test_tmp_session_key(self, client):
+        key = client.tmp_session_key()
+        print(key)
+    
+    def test_users(self, client):
+        users = client.users()
+        print(users)
+
+c = OctoClient(url=URL, apikey=APIKEY)
+print(c.version)
+t = TestClient()
+t.test_tmp_session_key(c)
+t.test_users(c)
