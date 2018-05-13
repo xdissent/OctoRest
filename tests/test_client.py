@@ -392,8 +392,16 @@ class TestClient:
         users = client.users()
         print(users)
 
+<<<<<<< HEAD
 # c = OctoClient(url=URL, apikey=APIKEY)
 # print(c.version)
 # t = TestClient()
 # t.test_tmp_session_key(c)
 # t.test_users(c)
+=======
+c = OctoClient(url=URL, apikey=APIKEY)
+print(c.version)
+t = TestClient()
+t.test_tmp_session_key(c)
+t.test_users(c)
+>>>>>>> 5df6c7227d94f58e0abd824d498694fdcbb7ddd0
