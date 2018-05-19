@@ -2,13 +2,23 @@
 
 ### Python client library for OctoPrint REST API
 
-Work in progress... 
+Work in progress...
 
-* General information
-    - Authorization
-    - Content Type
-    - Encoding
-    - Cross-origin requests
+This is continued work after the great start by Miro Hrončok of covering the OctoPrint REST API. Nearly all current functionality in the API has been covered, but as of yet I have not had time to add extensive testing. (Will do...) 
+
+### Installation
+
+This fork is behind the version of OctoClient on ```pip```.
+
+Therefore this version must be installed thus:
+
+```
+git clone git@github.com:dougbrion/octoclient.git
+sudo pip install -e octoclient
+```
+
+A check list of the features currently implemented can be seen below.
+
 * ~~Version information~~
 * Apps
     - Session Keys
