@@ -3,7 +3,7 @@ from threading import Thread
 
 import websocket
 
-from octoclient.sockjsclient import SockJSClient
+from octorest.sockjsclient import SockJSClient
 
 
 class WebSocketEventHandler(SockJSClient):

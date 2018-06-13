@@ -2,7 +2,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='octoclient',
+    name='octorest',
     version='0.2.dev2',
     description='Client library for OctoPrint REST API',
     long_description=''.join(open('README.md').readlines()),
@@ -10,7 +10,7 @@ setup(
     author='Miro Hrončok, Jiří Makarius, Douglas Brion',
     author_email='miro@hroncok.cz, meadowfrey@gmail.com, me@douglasbrion.com',
     license='MIT',
-    url='https://github.com/hroncok/octoclient',
+    url='https://github.com/dougbrion/OctoRest',
     packages=[p for p in find_packages() if p != 'tests'],
     install_requires=['requests', 'websocket-client'],
     setup_requires=['pytest-runner'],

@@ -5,7 +5,7 @@ from itertools import chain, combinations
 import pytest
 import os
 
-from octoclient import OctoClient
+from octorest import OctoRest
 
 from betamax import Betamax
 from betamax_serializers import pretty_json
@@ -53,7 +53,7 @@ def zero(component):
 # @pytest.mark.usefixtures('betamax_session')
 @pytest.fixture
 def client():
-    return OctoClient(url=URL, apikey=APIKEY, session=None)
+    return OctoRest(url=URL, apikey=APIKEY, session=None)
 
 
 @pytest.fixture
@@ -71,13 +71,13 @@ class TestClient:
     # @pytest.fixture
     def test_init_works_with_good_auth(self):
         # Should not raise anything
-        OctoClient(url=URL, apikey=APIKEY)
+        OctoRest(url=URL, apikey=APIKEY)
 
     @pytest.mark.usefixtures('betamax_session')
     # @pytest.fixture
     def test_init_raises_with_bad_auth(self):
         with pytest.raises(RuntimeError):
-            OctoClient(url=URL, apikey='nope')
+            OctoRest(url=URL, apikey='nope')
 
     def test_files_contains_files_and_free_space_info(self, client):
         files = client.files()
@@ -394,7 +394,7 @@ class TestClient:
         users = client.users()
         print(users)
 
-# c = OctoClient(url=URL, apikey=APIKEY)
+# c = OctoRest(url=URL, apikey=APIKEY)
 # print(c.version)
 # t = TestClient()
 # t.test_tmp_session_key(c)

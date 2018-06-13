@@ -1,6 +1,6 @@
 import pytest
 
-from octoclient import XHRStreamingEventHandler
+from octorest import XHRStreamingEventHandler
 
 from _common import URL
 

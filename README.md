@@ -1,4 +1,4 @@
-# OctoClient
+# OctoRest
 
 ### Python client library for OctoPrint REST API
 
@@ -8,7 +8,7 @@ This is continued work after the great start by Miro Hrončok of covering the Oc
 
 ### Installation
 
-This fork is behind the version of OctoClient on ```pip```.
+This fork is behind the version of OctoRest on ```pip```.
 
 Therefore this version must be installed thus:
 

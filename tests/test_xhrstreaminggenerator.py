@@ -1,6 +1,6 @@
 import pytest
 
-from octoclient import XHRStreamingGenerator
+from octorest import XHRStreamingGenerator
 
 from _common import URL
 

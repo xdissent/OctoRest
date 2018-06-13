@@ -4,7 +4,7 @@ from urllib import parse as urlparse
 
 import requests
 
-class OctoClient:
+class OctoRest:
     """
     Encapsulates communication with one OctoPrint instance
     """
@@ -798,7 +798,7 @@ class OctoClient:
     #     Requires admin rights.
 
     #     TODO: Create a profile body to send
-    #     TODO: Make a OctoClient _put method
+    #     TODO: Make a OctoRest _put method
     #     """
     #     return self._put('/api/slicing/{}/profiles/{}'.format(slicer, key))
 
