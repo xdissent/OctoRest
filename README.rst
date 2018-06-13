@@ -10,9 +10,9 @@ This is continued work after the great start by Miro Hrončok of covering the Oc
 
 OctoRest can be installed using the PyPi repository:
 
-``
+```
 sudo pip install octorest
-``
+```
 
 A check list of the features currently implemented can be seen below.
 
