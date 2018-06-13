@@ -140,5 +140,7 @@ Copyright & License
 -------------------
 
 Copyright (c) 2016-2017 `Miro Hrončok <miro@hroncok.cz/>`_. MIT License.
+
 Copyright (c) 2017 `Jiří Makarius <meadowfrey@gmail.com/>`_. MIT License.
+
 Copyright (c) 2018, `Douglas Brion <me@douglasbrion.com/>`_. MIT License.
