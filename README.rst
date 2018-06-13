@@ -13,6 +13,7 @@ Installation
 
 The easiest way to install the package is via ``pip``::
 
+<<<<<<< HEAD
     $ pip install octorest
     
 Usage
@@ -27,6 +28,13 @@ TODO: Insert some examples here
 
 Implemented features of OctoPrint REST API
 ------------------------------------------
+=======
+OctoRest can be installed using the PyPi repository:
+
+```
+sudo pip install octorest
+```
+>>>>>>> 03537b8dcb70b1c5f0e1d485b3e2add9b74798bb
 
 A check list of the features currently implemented can be seen below.
 
