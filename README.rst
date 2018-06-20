@@ -1,21 +1,32 @@
-# OctoRest
+===========================
+OctoRest
+===========================
 
-### Python client library for OctoPrint REST API
+Python client library for OctoPrint REST API
 
-Work in progress...
+This is continued work after the great start by Miro Hrončok of covering the
+OctoPrint REST API. Nearly all current functionality in the API has been covered,
+but as of yet I have not had time to add extensive testing. (Will do...)
 
-This is continued work after the great start by Miro Hrončok of covering the OctoPrint REST API. Nearly all current functionality in the API has been covered, but as of yet I have not had time to add extensive testing. (Will do...) 
+Installation
+------------
 
-### Installation
+The easiest way to install the package is via ``pip``::
 
-This fork is behind the version of OctoRest on ```pip```.
+    $ pip install octorest
+    
+Usage
+-----
 
-Therefore this version must be installed thus:
+TODO: Write basic guide on basic usage
 
-```
-git clone git@github.com:dougbrion/octoclient.git
-sudo pip install -e octoclient
-```
+Examples
+--------
+
+TODO: Insert some examples here
+
+Implemented features of OctoPrint REST API
+------------------------------------------
 
 A check list of the features currently implemented can be seen below.
 
@@ -124,3 +135,12 @@ A check list of the features currently implemented can be seen below.
 * Wizard
     - ~~Retrieve additional data about registered wizards~~
     - ~~Finish wizards~~
+
+Copyright & License
+-------------------
+
+Copyright (c) 2016-2017 `Miro Hrončok <miro@hroncok.cz/>`_. MIT License.
+
+Copyright (c) 2017 `Jiří Makarius <meadowfrey@gmail.com/>`_. MIT License.
+
+Copyright (c) 2018, `Douglas Brion <me@douglasbrion.com/>`_. MIT License.
