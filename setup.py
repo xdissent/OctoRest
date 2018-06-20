@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='octorest',
-    version='0.2.dev2',
+    version='0.2.dev3',
     description='Client library for OctoPrint REST API',
     long_description=''.join(open('README.rst').readlines()),
     keywords='octoprint, 3d printing',
