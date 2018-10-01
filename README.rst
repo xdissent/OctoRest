@@ -1,3 +1,11 @@
+.. |ss| raw:: html
+
+   <strike>
+
+.. |se| raw:: html
+
+   </strike>
+
 ===========================
 OctoRest
 ===========================
@@ -30,111 +38,111 @@ Implemented features of OctoPrint REST API
 
 A check list of the features currently implemented can be seen below.
 
-* ~~Version information~~
+* |ss| Version information |se|
 * Apps
     - Session Keys
-        - ~~Obtaining a temporary session key~~
-        - ~~Verifying a temporary session key~~
+        - |ss| Obtaining a temporary session key |se|
+        - |ss| Verifying a temporary session key |se|
 * Connection handling
-    - ~~Get connection settings~~
-    - ~~Issue a connection command~~
-        - ~~Connect~~
-        - ~~Disconnect~~
-        - ~~Fake_ack~~
+    - |ss| Get connection settings |se|
+    - |ss| Issue a connection command |se|
+        - |ss| Connect |se|
+        - |ss| Disconnect |se|
+        - |ss| Fake_ack |se|
 * File operations
-    - ~~Retrieve all files~~
-    - ~~Retrieve files from specific location~~
-    - ~~Upload file or create folder~~
-    - ~~Retrieve a specific file’s or folder’s information~~
+    - |ss| Retrieve all files |se|
+    - |ss| Retrieve files from specific location |se|
+    - |ss| Upload file or create folder |se|
+    - |ss| Retrieve a specific file’s or folder’s information |se|
     - Issue a file command
-        - ~~Select~~
+        - |ss| Select |se|
         - Slice (TODO: profile.* and position)
-        - ~~Copy~~
-        - ~~Move~~
-    - ~~Delete file~~
+        - |ss| Copy |se|
+        - |ss| Move |se|
+    - |ss| Delete file |se|
 * Job operations
     - Issue a job command
-        - ~~Start~~
-        - ~~Cancel~~
-        - ~~Restart~~
+        - |ss| Start |se|
+        - |ss| Cancel |se|
+        - |ss| Restart |se|
         - Pause
             - Pause
             - Resume
-            - ~~Toggle~~
-    - ~~Retrieve information about the current job~~
+            - |ss| Toggle |se|
+    - |ss| Retrieve information about the current job |se|
 * Languages
-    - ~~Retrieve installed language packs~~
-    - ~~Upload a language pack~~
-    - ~~Delete a language pack~~
+    - |ss| Retrieve installed language packs |se|
+    - |ss| Upload a language pack |se|
+    - |ss| Delete a language pack |se|
 * Log file management
 * Printer operations
-    - ~~Retrieve the current printer state~~
-    - ~~Issue a print head command~~
-        - ~~Jog~~
-        - ~~Home~~
-        - ~~Feedrate~~
-    - ~~Issue a tool command~~
-        - ~~Target~~
-        - ~~Offset~~
-        - ~~Select~~
-        - ~~Extrude~~
-        - ~~Flowrate~~
-    - ~~Retrieve the current tool state~~
-    - ~~Issue a bed command~~
-        - ~~Target~~
-        - ~~Offset~~
-    - ~~Retrieve the current bed state~~
-    - ~~Issue an SD command~~
-        - ~~Init~~
-        - ~~Refresh~~
-        - ~~Release~~
-    - ~~Retrieve the current SD state~~
-    - ~~Send an arbitrary command to the printer~~
+    - |ss| Retrieve the current printer state |se|
+    - |ss| Issue a print head command |se|
+        - |ss| Jog |se|
+        - |ss| Home |se|
+        - |ss| Feedrate |se|
+    - |ss| Issue a tool command |se|
+        - |ss| Target |se|
+        - |ss| Offset |se|
+        - |ss| Select |se|
+        - |ss| Extrude |se|
+        - |ss| Flowrate |se|
+    - |ss| Retrieve the current tool state |se|
+    - |ss| Issue a bed command |se|
+        - |ss| Target |se|
+        - |ss| Offset |se|
+    - |ss| Retrieve the current bed state |se|
+    - |ss| Issue an SD command |se|
+        - |ss| Init |se|
+        - |ss| Refresh |se|
+        - |ss| Release |se|
+    - |ss| Retrieve the current SD state |se|
+    - |ss| Send an arbitrary command to the printer |se|
 * Printer profile operations
-    - ~~Retrieve all printer profiles~~
+    - |ss| Retrieve all printer profiles |se|
     - Add a new printer profile
     - Update an existing printer profile
-    - ~~Remove an existing printer profile~~
+    - |ss| Remove an existing printer profile |se|
 * Settings
-    - ~~Retrieve current settings~~
-    - ~~Save settings~~
+    - |ss| Retrieve current settings |se|
+    - |ss| Save settings |se|
     - Regenerate the system wide API key
 * Slicing
-    - ~~List All Slicers and Slicing Profiles~~
-    - ~~List Slicing Profiles of a Specific Slicer~~
-    - ~~Retrieve Specific Profile~~
+    - |ss| List All Slicers and Slicing Profiles |se|
+    - |ss| List Slicing Profiles of a Specific Slicer |se|
+    - |ss| Retrieve Specific Profile |se|
     - Add Slicing Profile
-    - ~~Delete Slicing Profile~~
+    - |ss| Delete Slicing Profile |se|
 * System
-    - ~~List all registered system commands~~
-    - ~~List all registered system commands for a source~~
-    - ~~Execute a registered system command~~
+    - |ss| List all registered system commands |se|
+    - |ss| List all registered system commands for a source |se|
+    - |ss| Execute a registered system command |se|
 * Timelapse
-    - ~~Retrieve a list of timelapses and the current config~~
-    - ~~Delete a timelapse~~
-    - ~~Issue a command for an unrendered timelapse~~
-        - ~~Render~~
-    - ~~Delete an unrendered timelapse~~
-    - ~~Change current timelapse config~~
+    - |ss| Retrieve a list of timelapses and the current config |se|
+    - |ss| Delete a timelapse |se|
+    - |ss| Issue a command for an unrendered timelapse |se|
+        - |ss| Render |se|
+    - |ss| Delete an unrendered timelapse |se|
+    - |ss| Change current timelapse config |se|
 * User
-    - ~~Retrieve a list of users~~
-    - ~~Retrieve a user~~
-    - ~~Add a user~~
-    - ~~Update a user~~
-    - ~~Delete a user~~
-    - ~~Reset a user’s password~~
-    - ~~Retrieve a user’s settings~~
+    - |ss| Retrieve a list of users |se|
+    - |ss| Retrieve a user |se|
+    - |ss| Add a user |se|
+    - |ss| Update a user |se|
+    - |ss| Delete a user |se|
+    - |ss| Reset a user’s password |se|
+    - |ss| Retrieve a user’s settings |se|
     - Update a user’s settings
-    - ~~Regenerate a user’s personal API key~~
-    - ~~Delete a user’s personal API key~~
+    - |ss| Regenerate a user’s personal API key |se|
+    - |ss| Delete a user’s personal API key |se|
 * Util
     - Test paths or URLs
         - Path
         - URL
         - Server
 * Wizard
-    - ~~Retrieve additional data about registered wizards~~
-    - ~~Finish wizards~~
+    - |ss| Retrieve additional data about registered wizards |se|
+    - |ss| Finish wizards |se|
 
 Copyright & License
 -------------------
