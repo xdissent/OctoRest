@@ -23,15 +23,62 @@ The easiest way to install the package is via ``pip``::
 
     $ pip install octorest
     
-Usage
------
-
-TODO: Write basic guide on basic usage
 
 Examples
 --------
 
-TODO: Insert some examples here
+You may want a function which returns an instance of the OctoRest object connected to your printer.
+
+.. code-block:: python
+
+   def make_client(url, apikey):
+        """Creates and returns an instance of the OctoRest client.
+        
+        Args:
+            url - the url to the OctoPrint server
+            apikey - the apikey from the OctoPrint server found in settings
+        """
+        try:
+            client = OctoRest(url=url, apikey=apikey)
+            return client
+        except ConnectionError as ex:
+            # Handle exception as you wish
+            print(ex)
+            
+Once we have a client we can do many a cool thing with it!
+For example the following retrieves all the G-code file names on your OctoPrint server and adds them to a string which is printed out.
+
+.. code-block:: python
+
+   def file_names(client):
+        """Retrieves the G-code file names from the
+        OctoPrint server and returns a string message listing the
+        file names.
+        
+        Args:
+            client - the OctoRest client
+        """
+        message = "The GCODE files currently on the printer are:\n\n"
+        for k in client.files()['files']:
+            message += k['name'] + "\n"
+        print(message)
+
+Maybe you want to stop your print and then subsequently home the printer. This is very simple to do using OctoRest!
+
+.. code-block:: python
+
+   def toggle_home(client):
+        """Toggles the current print (if printing it pauses and
+        if paused it starts printing) and then homes all of
+        the printers axes.
+        
+        Args:
+            client - the OctoRest client 
+        """
+        print("Toggling the print!")
+        client.pause()
+        print("Homing your 3d printer...")
+        client.home()
 
 Implemented features of OctoPrint REST API
 ------------------------------------------
