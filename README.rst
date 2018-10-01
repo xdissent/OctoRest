@@ -30,7 +30,7 @@ Implemented features of OctoPrint REST API
 
 A check list of the features currently implemented can be seen below.
 
-* ~~Version information~~
+* :strike:`Version information`
 * Apps
     - Session Keys
         - ~~Obtaining a temporary session key~~
