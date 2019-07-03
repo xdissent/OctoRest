@@ -66,6 +66,7 @@ class XHRStreamingEventHandler(SockJSClient):
         Sends data, currently not working properly.
         OctoPrint server returns 404.
         """
+        print("SENDING")
         url = self.url.format(protocol="https" if self.secure else "http",
                               method="xhr_send")
         response = self.socket.post(url, data=json.dumps(data))

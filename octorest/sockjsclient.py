@@ -21,8 +21,7 @@ class SockJSClient:
     def __init__(self, url, on_open=None, on_close=None, on_message=None):
         self.on_open = on_open if callable(on_open) else lambda x: None
         self.on_close = on_close if callable(on_close) else lambda x: None
-        self.on_message = \
-            on_message if callable(on_message) else lambda x, y: None
+        self.on_message = on_message if callable(on_message) else lambda x, y: None
 
         self.thread = None
         self.socket = None

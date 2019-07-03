@@ -25,7 +25,7 @@ class TestXHRStreamingGenerator:
     def test_init_works(self, betamax_session):
         XHRStreamingEventHandler(url=URL, session=betamax_session)
 
-    @pytest.mark.xfail(reason="OctoPrints tornado server returns 404")
+    @pytest.mark.xfail(reason="OctoPrint\'s tornado server returns 404")
     def test_send(self, client):
         r = client.send({"throttle": 10})
         assert r.status_code in [200, 204]

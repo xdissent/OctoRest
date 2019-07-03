@@ -10,10 +10,7 @@ from octorest import OctoRest
 from betamax import Betamax
 from betamax_serializers import pretty_json
 
-
-URL = 'http://octopi.local'
-APIKEY = 'YouShallNotPass'
-
+from _common import URL, APIKEY
 
 with Betamax.configure() as config:
     config.cassette_library_dir = 'tests/fixtures/cassettes'
@@ -31,9 +28,17 @@ def sleep(seconds):
     '''
     If recording, sleep for a given amount of seconds
     '''
-    if 'RECORD' in os.environ:
-        time.sleep(seconds)
+    # if 'RECORD' in os.environ:
+    time.sleep(seconds)
 
+def cmd_wait(client, state):
+    while client.state() == state:
+        sleep(0.1)
+
+
+def cmd_wait_until(client, state):
+    while client.state() != state:
+        sleep(0.1)
 
 def subsets(*items):
     '''
@@ -63,30 +68,28 @@ def gcode():
             self.filename = filename
             self.path = 'tests/fixtures/gcodes/{}'.format(filename)
 
-    return GCode('homex.gcode')
+    return GCode('telephonebox.gcode')
 
 
 class TestClient:
     @pytest.mark.usefixtures('betamax_session')
-    # @pytest.fixture
     def test_init_works_with_good_auth(self):
         # Should not raise anything
         OctoRest(url=URL, apikey=APIKEY)
 
     @pytest.mark.usefixtures('betamax_session')
-    # @pytest.fixture
     def test_init_raises_with_bad_auth(self):
         with pytest.raises(RuntimeError):
             OctoRest(url=URL, apikey='nope')
 
     def test_files_contains_files_and_free_space_info(self, client):
         files = client.files()
-        assert 'hodorstop.gcode' in [f['name'] for f in files['files']]
+        assert 'bigben.gcode' in [f['name'] for f in files['files']]
         assert isinstance(files['free'], int)
 
     def test_files_local_works(self, client):
         files = client.files('local')
-        assert 'hodorstop.gcode' in [f['name'] for f in files['files']]
+        assert 'bigben.gcode' in [f['name'] for f in files['files']]
         assert isinstance(files['free'], int)
 
     def test_files_sdcard_works(self, client):
@@ -94,12 +97,12 @@ class TestClient:
         assert files['files'] == []  # no files on sdcard
         assert 'free' not in files  # API doesn't report that back
 
-    @pytest.mark.parametrize('filename', ('hodorstop.gcode', 'plate2.gcode'))
+    @pytest.mark.parametrize('filename', ('bigben.gcode', 'stpauls.gcode'))
     def test_info_for_specific_file(self, client, filename):
         f = client.files(filename)
         assert f['name'] == filename
 
-    @pytest.mark.parametrize('filename', ('nietzsche.gcode', 'noexist.gcode'))
+    @pytest.mark.parametrize('filename', ('unicorn.gcode', 'yeti.gcode', 'noexist.gcode'))
     def test_nonexisting_file_raises(self, client, filename):
         with pytest.raises(RuntimeError):
             client.files(filename)
@@ -127,12 +130,14 @@ class TestClient:
 
     def test_upload_and_print(self, client, gcode):
         f = client.upload(gcode.path, print=True)
+        sleep(1)
         assert f['done']
         assert f['files']['local']['name'] == gcode.filename
         selected = client.job_info()['job']['file']['name']
         assert selected == gcode.filename
         assert client.state() == 'Printing'
-        sleep(5)
+        client.cancel()
+        cmd_wait(client, 'Cancelling')
         client.delete(gcode.filename)
 
     def test_upload_and_select_one_by_one(self, client, gcode):
@@ -145,10 +150,12 @@ class TestClient:
     def test_upload_and_select_with_print_one_by_one(self, client, gcode):
         client.upload(gcode.path)
         client.select(gcode.filename, print=True)
+        sleep(1)
         selected = client.job_info()['job']['file']['name']
         assert selected == gcode.filename
         assert client.state() == 'Printing'
-        sleep(5)
+        client.cancel()
+        cmd_wait(client, 'Cancelling')
         client.delete(gcode.filename)
 
     def test_upload_and_select_and_print_one_by_one(self, client, gcode):
@@ -157,8 +164,10 @@ class TestClient:
         selected = client.job_info()['job']['file']['name']
         assert selected == gcode.filename
         client.print()
+        sleep(1)
         assert client.state() == 'Printing'
-        sleep(5)
+        client.cancel()
+        cmd_wait(client, 'Cancelling')
         client.delete(gcode.filename)
 
     def test_upload_print_pause_cancel(self, client, gcode):
@@ -166,10 +175,11 @@ class TestClient:
         client.select(gcode.filename, print=True)
         sleep(1)
         client.pause()
+        cmd_wait(client, 'Pausing')
         assert client.state() == 'Paused'
         sleep(1)
         client.cancel()
-        sleep(1)
+        cmd_wait(client, 'Cancelling')
         client.delete(gcode.filename)
 
     def test_upload_print_pause_restart(self, client, gcode):
@@ -177,10 +187,12 @@ class TestClient:
         client.select(gcode.filename, print=True)
         sleep(1)
         client.pause()
-        sleep(1)
+        cmd_wait_until(client, 'Paused')
         client.restart()
+        sleep(2)
         assert client.state() == 'Printing'
-        sleep(5)
+        client.cancel()
+        cmd_wait(client, 'Cancelling')
         client.delete(gcode.filename)
 
     def test_connection_info(self, client):
@@ -204,16 +216,25 @@ class TestClient:
         Since it's hard with betamax fixture to check state() multiple times
         in one test, this test hopes test_disconnect() was called before it.
         It is not possible to run it without it in record mode.
-        TODO Fix this
+        TODO: Fix this
         '''
-        client.connect()
-        assert client.state() in ['Connecting',
-                                  'Operational',
-                                  'Opening serial port']
+        if client.state() in ['Offline', 'Closed']:
+            client.connect()
+            cmd_wait(client, 'Detecting baudrate')
+            assert client.state() in ['Connecting',
+                                    'Operational',
+                                    'Opening serial port']
+        else:
+            client.disconnect()
+            client.connect()
+            cmd_wait(client, 'Detecting baudrate')
+            assert client.state() in ['Connecting',
+                                    'Operational',
+                                    'Opening serial port']
 
     def test_fake_ack(self, client):
         client.fake_ack()
-        # TODO What to check?
+        # TODO: What to check?
 
     def test_logs(self, client):
         logs = client.logs()
@@ -222,10 +243,13 @@ class TestClient:
         assert isinstance(logs['free'], int)
 
     def test_delete_log(self, client):
-        client.delete_log('serial.log')
+        logs = client.logs()
+        log_lst = [log['name'] for log in logs['files']]
+        assert 'octoprint.log' in log_lst
+        client.delete_log('octoprint.log')
         logs = client.logs()
         for log in logs['files']:
-            assert log['name'] != 'serial.log'
+            assert log['name'] != 'octoprint.log'
 
     def test_printer(self, client):
         printer = client.printer()
@@ -238,164 +262,158 @@ class TestClient:
         assert 'tool0' in printer['temperature']
         assert 'history' not in printer['temperature']
 
-    @pytest.mark.parametrize('exclude', subsets('sd', 'temperature', 'state'))
-    def test_printer_with_excluded_stuff(self, client, exclude):
-        printer = client.printer(exclude=exclude)
-        for key in exclude:
-            assert key not in printer
-        assert len(printer) == 3 - len(exclude)
+    # @pytest.mark.parametrize('exclude', subsets('sd', 'temperature', 'state'))
+    # def test_printer_with_excluded_stuff(self, client, exclude):
+    #     printer = client.printer(exclude=exclude)
+    #     for key in exclude:
+    #         assert key not in printer
+    #     assert len(printer) == 3 - len(exclude)
 
-    def test_printer_with_history(self, client):
-        printer = client.printer(history=True)
-        assert isinstance(printer['temperature']['history'], list)
+    # def test_printer_with_history(self, client):
+    #     printer = client.printer(history=True)
+    #     assert isinstance(printer['temperature']['history'], list)
 
-    @pytest.mark.parametrize('limit', range(1, 4))
-    def test_printer_with_history_and_limit(self, client, limit):
-        printer = client.printer(history=True, limit=limit)
-        assert len(printer['temperature']['history']) == limit
+    # @pytest.mark.parametrize('limit', range(1, 4))
+    # def test_printer_with_history_and_limit(self, client, limit):
+    #     printer = client.printer(history=True, limit=limit)
+    #     assert len(printer['temperature']['history']) == limit
 
-    @pytest.mark.parametrize('key', ('actual', 'target', 'offset'))
-    @pytest.mark.parametrize('component', ('tool', 'bed'))
-    def test_tool_and_bed(self, client, key, component):
-        info = getattr(client, component)()  # client.tool() or bed()
-        assert 'history' not in info
-        assert isinstance(info[zero(component)][key], (float, int))
+    # @pytest.mark.parametrize('key', ('actual', 'target', 'offset'))
+    # @pytest.mark.parametrize('component', ('tool', 'bed'))
+    # def test_tool_and_bed(self, client, key, component):
+    #     info = getattr(client, component)()  # client.tool() or bed()
+    #     assert 'history' not in info
+    #     assert isinstance(info[zero(component)][key], (float, int))
 
-    @pytest.mark.parametrize('key', ('actual', 'target'))
-    @pytest.mark.parametrize('component', ('tool', 'bed'))
-    def test_tool_and_bed_with_history(self, client, key, component):
-        info = getattr(client, component)(history=True)
-        assert 'history' in info
-        for h in info['history']:
-            assert isinstance(h[zero(component)][key], (float, int))
+    # @pytest.mark.parametrize('key', ('actual', 'target'))
+    # @pytest.mark.parametrize('component', ('tool', 'bed'))
+    # def test_tool_and_bed_with_history(self, client, key, component):
+    #     info = getattr(client, component)(history=True)
+    #     assert 'history' in info
+    #     for h in info['history']:
+    #         assert isinstance(h[zero(component)][key], (float, int))
 
-    @pytest.mark.parametrize('limit', range(1, 4))
-    @pytest.mark.parametrize('component', ('tool', 'bed'))
-    def test_tool_and_bed_with_history_limit(self, client, limit, component):
-        info = getattr(client, component)(history=True, limit=limit)
-        assert len(info['history']) == limit
+    # @pytest.mark.parametrize('limit', range(1, 4))
+    # @pytest.mark.parametrize('component', ('tool', 'bed'))
+    # def test_tool_and_bed_with_history_limit(self, client, limit, component):
+    #     info = getattr(client, component)(history=True, limit=limit)
+    #     assert len(info['history']) == limit
 
-    def test_home_all(self, client):
-        # we are only testing if no exception occurred, there's no return
-        client.home()
+    # def test_home_all(self, client):
+    #     # we are only testing if no exception occurred, there's no return
+    #     client.home()
 
-    @pytest.mark.parametrize('axes', (('x',), ('y',), ('z',), ('x', 'y',)))
-    def test_home_some(self, client, axes):
-        # we are only testing if no exception occurred, there's no return
-        client.home(axes)
+    # @pytest.mark.parametrize('axes', (('x',), ('y',), ('z',), ('x', 'y',)))
+    # def test_home_some(self, client, axes):
+    #     # we are only testing if no exception occurred, there's no return
+    #     client.home(axes)
 
-    @pytest.mark.parametrize('coordinates', ((20, 0, 0), (0, 20, 0)))
-    def test_jog(self, client, coordinates):
-        # we are only testing if no exception occurred, there's no return
-        client.jog(*coordinates)
+    # @pytest.mark.parametrize('coordinates', ((20, 0, 0), (0, 20, 0)))
+    # def test_jog(self, client, coordinates):
+    #     # we are only testing if no exception occurred, there's no return
+    #     client.jog(*coordinates)
 
-    @pytest.mark.parametrize('factor', (100, 50, 150, 0.5, 1.0))
-    def test_feedrate(self, client, factor):
-        # we are only testing if no exception occurred, there's no return
-        client.feedrate(factor)
+    # @pytest.mark.parametrize('factor', (100, 50, 150, 0.5, 1.0))
+    # def test_feedrate(self, client, factor):
+    #     # we are only testing if no exception occurred, there's no return
+    #     client.feedrate(factor)
 
-    @pytest.mark.parametrize('how', (200, [200], {'tool0': 200}))
-    def test_set_tool_temperature_to_200(self, client, how):
-        client.tool_target(how)
-        tool = client.tool()
-        assert tool['tool0']['target'] == 200.0
-        if 'RECORD' in os.environ:
-            # Betamax had some problems here
-            # And we don't do this for testing, but only with actual printer
-            client.tool_target(0)
+    # @pytest.mark.parametrize('how', (200, [200], {'tool0': 200}))
+    # def test_set_tool_temperature_to_200(self, client, how):
+    #     client.tool_target(how)
+    #     tool = client.tool()
+    #     assert tool['tool0']['target'] == 200.0
+    #     if 'RECORD' in os.environ:
+    #         # Betamax had some problems here
+    #         # And we don't do this for testing, but only with actual printer
+    #         client.tool_target(0)
 
-    @pytest.mark.parametrize('how', (20, [20], {'tool0': 20}))
-    def test_set_tool_offset_to_20(self, client, how):
-        client.tool_offset(how)
-        # tool = client.tool()
-        # assert tool['tool0']['offset'] == 20.0
-        # TODO make the above assert work?
-        if 'RECORD' in os.environ:
-            client.tool_offset(0)
+    # @pytest.mark.parametrize('how', (20, [20], {'tool0': 20}))
+    # def test_set_tool_offset_to_20(self, client, how):
+    #     client.tool_offset(how)
+    #     # tool = client.tool()
+    #     # assert tool['tool0']['offset'] == 20.0
+    #     # TODO make the above assert work?
+    #     if 'RECORD' in os.environ:
+    #         client.tool_offset(0)
 
-    def test_selecting_tool(self, client):
-        # we are only testing if no exception occurred, there's no return
-        client.tool_select(0)
+    # def test_selecting_tool(self, client):
+    #     # we are only testing if no exception occurred, there's no return
+    #     client.tool_select(0)
 
-    def test_extruding(self, client):
-        # we are only testing if no exception occurred, there's no return
-        client.extrude(1)
+    # def test_extruding(self, client):
+    #     # we are only testing if no exception occurred, there's no return
+    #     client.extrude(1)
 
-    def test_retracting(self, client):
-        # we are only testing if no exception occurred, there's no return
-        client.retract(1)
+    # def test_retracting(self, client):
+    #     # we are only testing if no exception occurred, there's no return
+    #     client.retract(1)
 
-    @pytest.mark.parametrize('factor', (100, 75, 125, 0.75, 1.0))
-    def test_flowrate(self, client, factor):
-        # we are only testing if no exception occurred, there's no return
-        client.flowrate(factor)
+    # @pytest.mark.parametrize('factor', (100, 75, 125, 0.75, 1.0))
+    # def test_flowrate(self, client, factor):
+    #     # we are only testing if no exception occurred, there's no return
+    #     client.flowrate(factor)
 
-    def test_set_bed_temperature_to_100(self, client):
-        client.bed_target(100)
-        bed = client.bed()
-        assert bed['bed']['target'] == 100.0
-        if 'RECORD' in os.environ:
-            client.bed_target(0)
+    # def test_set_bed_temperature_to_100(self, client):
+    #     client.bed_target(100)
+    #     bed = client.bed()
+    #     assert bed['bed']['target'] == 100.0
+    #     if 'RECORD' in os.environ:
+    #         client.bed_target(0)
 
-    def test_set_bed_offset_to_10(self, client):
-        client.bed_offset(10)
-        bed = client.bed()
-        assert bed['bed']['offset'] == 10.0
-        if 'RECORD' in os.environ:
-            client.bed_offset(0)
+    # def test_set_bed_offset_to_10(self, client):
+    #     client.bed_offset(10)
+    #     bed = client.bed()
+    #     assert bed['bed']['offset'] == 10.0
+    #     if 'RECORD' in os.environ:
+    #         client.bed_offset(0)
 
-    def test_sd_card_init(self, client):
-        client.sd_init()
+    # def test_sd_card_init(self, client):
+    #     client.sd_init()
 
-    def test_sd_card_refresh(self, client):
-        client.sd_refresh()
+    # def test_sd_card_refresh(self, client):
+    #     client.sd_refresh()
 
-    def test_sd_card_release(self, client):
-        client.sd_release()
+    # def test_sd_card_release(self, client):
+    #     client.sd_release()
 
-    def test_sd_card_status(self, client):
-        sd = client.sd()
-        # no SD card here, so always not ready
-        assert sd['ready'] is False
+    # def test_sd_card_status(self, client):
+    #     sd = client.sd()
+    #     # no SD card here, so always not ready
+    #     assert sd['ready'] is False
 
-    def test_single_gcode_command(self, client):
-        client.gcode('G28 X')
+    # def test_single_gcode_command(self, client):
+    #     client.gcode('G28 X')
 
-    def test_multiple_gcode_commands_nl(self, client):
-        client.gcode('G28 X\nG28 Y')
+    # def test_multiple_gcode_commands_nl(self, client):
+    #     client.gcode('G28 X\nG28 Y')
 
-    def test_multiple_gcode_commands_list(self, client):
-        client.gcode(['G28 X', 'G28 Y'])
+    # def test_multiple_gcode_commands_list(self, client):
+    #     client.gcode(['G28 X', 'G28 Y'])
 
-    def test_get_settings(self, client):
-        settings = client.settings()
-        assert 'api' in settings
-        assert settings['api']['enabled'] is True
+    # def test_get_settings(self, client):
+    #     settings = client.settings()
+    #     assert 'api' in settings
+    #     assert settings['api']['enabled'] is True
 
-    def test_unchanged_settings(self, client):
-        settings = client.settings()
-        new_settings = client.settings({})
-        print(new_settings)
-        assert settings['api']['enabled'] == new_settings['api']['enabled']
+    # def test_unchanged_settings(self, client):
+    #     settings = client.settings()
+    #     new_settings = client.settings({})
+    #     print(new_settings)
+    #     assert settings['api']['enabled'] == new_settings['api']['enabled']
 
-    def test_change_settings(self, client):
-        settings = client.settings()
-        printer_name = settings['appearance']['name']
-        test_name = {'appearance': {'name': 'Test'}}
-        new_settings = client.settings(test_name)
-        assert new_settings['appearance']['name'] == "Test"
-        client.settings({'appearance': {'name': printer_name}})
+    # def test_change_settings(self, client):
+    #     settings = client.settings()
+    #     printer_name = settings['appearance']['name']
+    #     test_name = {'appearance': {'name': 'Test'}}
+    #     new_settings = client.settings(test_name)
+    #     assert new_settings['appearance']['name'] == 'Test'
+    #     client.settings({'appearance': {'name': printer_name}})
     
-    def test_tmp_session_key(self, client):
-        key = client.tmp_session_key()
-        print(key)
+    # def test_tmp_session_key(self, client):
+    #     key = client.tmp_session_key()
+    #     print(key)
     
-    def test_users(self, client):
-        users = client.users()
-        print(users)
-
-# c = OctoRest(url=URL, apikey=APIKEY)
-# print(c.version)
-# t = TestClient()
-# t.test_tmp_session_key(c)
-# t.test_users(c)
+    # def test_users(self, client):
+    #     users = client.users()
+    #     print(users)

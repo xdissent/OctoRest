@@ -380,14 +380,54 @@ class OctoRest:
         data = {'command': 'start'}
         self._post('/api/job', json=data, ret=False)
 
+    def pause_command(self, action):
+        """
+        Pauses/resumes/toggles the current print job.
+        Accepts one optional additional parameter action specifying
+        which action to take.
+
+        In order to stay backwards compatible to earlier iterations of this API,
+        the default action to take if no action parameter is supplied is to
+        toggle the print job status.
+
+        Pause:
+            Pauses the current job if it’s printing,
+            does nothing if it’s already paused.
+        Resume:
+            Resumes the current job if it’s paused,
+            does nothing if it’s printing.
+        Toggle:
+            Toggles the pause state of the job,
+            pausing it if it’s printing and resuming it
+            if it’s currently paused.
+        """
+        data = {
+            'command': 'pause',
+            'action': action,
+        }
+        self._post('/api/job', json=data, ret=False)
+    
     def pause(self):
         """
-        Pauses/unpauses the current print job
-
-        There must be an active print job for this to work
+        Pauses the current job if it’s printing,
+        does nothing if it’s already paused.
         """
-        data = {'command': 'pause'}
-        self._post('/api/job', json=data, ret=False)
+        self.pause_command(action='pause')
+
+    def resume(self):
+        """
+        Resumes the current job if it’s paused,
+        does nothing if it’s printing.
+        """
+        self.pause_command(action='resume')
+    
+    def toggle(self):
+        """
+        Toggles the pause state of the job,
+        pausing it if it’s printing and resuming it
+        if it’s currently paused.
+        """
+        self.pause_command(action='toggle')
 
     def restart(self):
         """
