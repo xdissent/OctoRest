@@ -85,6 +85,10 @@ Implemented features of OctoPrint REST API
 
 A check list of the features currently implemented can be seen below.
 
+* General information
+    - Authorization
+    - Login
+    - Logout
 * |ss| Version information |se|
 * Apps
     - Session Keys
@@ -103,7 +107,7 @@ A check list of the features currently implemented can be seen below.
     - |ss| Retrieve a specific file’s or folder’s information |se|
     - Issue a file command
         - |ss| Select |se|
-        - Slice (TODO: profile.* and position)
+        - Slice
         - |ss| Copy |se|
         - |ss| Move |se|
     - |ss| Delete file |se|
@@ -122,6 +126,8 @@ A check list of the features currently implemented can be seen below.
     - |ss| Upload a language pack |se|
     - |ss| Delete a language pack |se|
 * Log file management
+    - Retrieve a list of available log files
+    - Delete a specific logfile
 * Printer operations
     - |ss| Retrieve the current printer state |se|
     - |ss| Issue a print head command |se|
@@ -139,6 +145,10 @@ A check list of the features currently implemented can be seen below.
         - |ss| Target |se|
         - |ss| Offset |se|
     - |ss| Retrieve the current bed state |se|
+    - Issue a chamber command
+        - Target
+        - Offset
+    - Retrieve the current chamber state
     - |ss| Issue an SD command |se|
         - |ss| Init |se|
         - |ss| Refresh |se|
@@ -154,6 +164,7 @@ A check list of the features currently implemented can be seen below.
     - |ss| Retrieve current settings |se|
     - |ss| Save settings |se|
     - Regenerate the system wide API key
+    - Fetch template data (in beta)
 * Slicing
     - |ss| List All Slicers and Slicing Profiles |se|
     - |ss| List Slicing Profiles of a Specific Slicer |se|
