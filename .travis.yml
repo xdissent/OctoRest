@@ -12,6 +12,7 @@ env:
 before_install:
 - |
   deactivate
+  cd ~/
   git clone https://github.com/foosel/OctoPrint.git
   cd OctoPrint
   virtualenv -p python2.7 octoprint-venv
@@ -21,7 +22,7 @@ before_install:
   pip2 install -e .[develop]
   deactivate
 install:
-- cd ~/
+- cd ~/OctoRest/
 - python3 setup.py install
 script:
 - octoprint serve --port 5000
