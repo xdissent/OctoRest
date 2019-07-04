@@ -89,7 +89,8 @@ A check list of the features currently implemented can be seen below.
     - Authorization
     - Login
     - Logout
-* |ss| Version information |se|
+* Version information
+    - |ss| Version information |se|
 * Apps
     - Session Keys
         - |ss| Obtaining a temporary session key |se|
