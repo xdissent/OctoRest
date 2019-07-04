@@ -12,9 +12,12 @@ env:
 before_install:
 - git clone https://github.com/foosel/OctoPrint.git
 - cd OctoPrint
-install:
+- virtualenv octoprint-venv
+- source octoprint-venv/bin/activate
 - pip2 install --upgrade pip
 - pip2 install -e .[develop]
+- deactivate
+install:
 - cd ~/
 - python3 setup.py install
 script:
