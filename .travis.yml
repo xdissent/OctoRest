@@ -7,7 +7,18 @@ python:
 - "3.6"
 - "3.6-dev"  # 3.6 development branch
 - 'pypy3.3-5.5-alpha'
+env:
+- OCTOPRINT_URL="http://localhost:5000/"
+- OCTOPRINT_APIKEY="apikey"
+before_install:
+- git clone https://github.com/foosel/OctoPrint.git
+- cd OctoPrint
+- virtualenv venv
 install:
+- source venv/bin/activate
+- pip install --upgrade pip
+- pip install .[develop]
+- octoprint serve --port 5000
 - python setup.py install
 script:
 - python setup.py test

@@ -33,7 +33,7 @@ class OctoRest:
 
         # Try a simple request to see if the API key works
         # Keep the info, in case we need it later
-        self.version = self.version()
+        self.version = self.get_version()
 
     def _get(self, path, params=None):
         """
@@ -132,7 +132,7 @@ class OctoRest:
             raise RuntimeError(msg)
         return response
 
-    def version(self):
+    def get_version(self):
         """
         Retrieve information regarding server and API version
         """
@@ -232,6 +232,17 @@ class OctoRest:
             return self._post('/api/files/{}'.format(location),
                               files=files, data=data)
 
+    def new_folder(self, folder_name, location='local'):
+        """
+        To create a new folder, the request body must at least contain the foldername
+        form field, specifying the name of the new folder. Note that folder creation
+        is currently only supported on the local file system.
+        """
+        data = {
+            'foldername': folder_name,
+        }
+        return self._post('/api/files/{}'.format(location), data=data)
+
     def delete(self, location):
         """
         Delete the selected filename on the selected target
@@ -255,7 +266,7 @@ class OctoRest:
         }
         self._post('/api/files/{}'.format(location), json=data, ret=False)
     
-    def slice(self, location, slicer='cura', gcode=None, printer_profile=None, 
+    def slice(self, location, slicer='curalegacy', gcode=None, position=None, printer_profile=None, 
               profile=None, select=False, print=False):
         """
         Slices an STL file into GCODE. 
@@ -263,7 +274,7 @@ class OctoRest:
         will take place in the background after the response 
         has been sent back to the client.
 
-        TODO: ADD POSITION, PROFILE.*
+        TODO: ADD PROFILE.*
         """
         location = self._prepend_local(location)
         data = {
@@ -274,6 +285,8 @@ class OctoRest:
         }
         if not gcode == None:
             data['gcode'] = gcode
+        if not position == None:
+            data['position'] = position
         if not printer_profile == None:
             data['printerProfile'] = printer_profile
         if not profile == None:

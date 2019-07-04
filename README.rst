@@ -96,9 +96,10 @@ A check list of the features currently implemented can be seen below.
 * Version information
     - |ss| Version information |se|
 * Apps
-    - Session Keys
-        - |ss| Obtaining a temporary session key |se|
-        - |ss| Verifying a temporary session key |se|
+    - Session Keys (Deprecated since version 1.3.11: This functionality will be removed in 1.4.0.
+        Use the Application Keys Plugin workflow instead.)
+        - Obtaining a temporary session key
+        - Verifying a temporary session key
 * Connection handling
     - |ss| Get connection settings |se|
     - |ss| Issue a connection command |se|
@@ -112,7 +113,7 @@ A check list of the features currently implemented can be seen below.
     - |ss| Retrieve a specific file’s or folder’s information |se|
     - Issue a file command
         - |ss| Select |se|
-        - Slice
+        - |ss| Slice |se|
         - |ss| Copy |se|
         - |ss| Move |se|
     - |ss| Delete file |se|

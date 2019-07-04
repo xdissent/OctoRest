@@ -82,6 +82,16 @@ class TestClient:
         with pytest.raises(RuntimeError):
             OctoRest(url=URL, apikey='nope')
 
+    ### VERSION INFORMATION TESTS ###
+    
+    def test_version(self, client):
+        version = client.get_version()
+        assert 'api' in version
+        assert 'server' in version
+        assert 'text' in version
+
+    ### FILE OPERATION TESTS ###
+
     def test_files_contains_files_and_free_space_info(self, client):
         files = client.files()
         assert 'bigben.gcode' in [f['name'] for f in files['files']]
@@ -169,6 +179,83 @@ class TestClient:
         client.cancel()
         cmd_wait(client, 'Cancelling')
         client.delete(gcode.filename)
+    
+    def test_file_copy(self, client, gcode):
+        client.upload(gcode.path)
+        client.copy(gcode.filename, 'copied.gcode')
+        files = client.files()
+        assert gcode.filename in [f['name'] for f in files['files']]
+        assert 'copied.gcode' in [f['name'] for f in files['files']]
+        client.delete(gcode.filename)
+        client.delete('copied.gcode')
+    
+    def test_file_copy_exists(self, client, gcode):
+        client.upload(gcode.path)
+        client.copy(gcode.filename, 'copied.gcode')
+        files = client.files()
+        assert gcode.filename in [f['name'] for f in files['files']]
+        assert 'copied.gcode' in [f['name'] for f in files['files']]
+        with pytest.raises(RuntimeError):
+            client.copy(gcode.filename, 'copied.gcode')
+        client.delete(gcode.filename)
+        
+    
+    def test_file_copy_folder_not_exist(self, client, gcode):
+        files = client.files()
+        if 'copied.gcode' in [f['name'] for f in files['files']]:
+            client.delete('copied.gcode')
+        client.upload(gcode.path)
+        with pytest.raises(RuntimeError):
+            client.copy(gcode.filename, '/random/path/copied.gcode')
+        client.delete(gcode.filename)
+
+    def test_file_move(self, client, gcode):
+        client.upload(gcode.path)
+        client.move(gcode.filename, 'moved.gcode')
+        files = client.files()
+        assert 'moved.gcode' in [f['name'] for f in files['files']]
+        client.delete('moved.gcode')
+
+    def test_file_move_exists(self, client, gcode):
+        client.upload(gcode.path)
+        client.move(gcode.filename, 'moved.gcode')
+        files = client.files()
+        assert 'moved.gcode' in [f['name'] for f in files['files']]
+        client.upload(gcode.path)
+        with pytest.raises(RuntimeError):
+            client.move(gcode.filename, 'moved.gcode')
+        client.delete(gcode.filename)
+        client.delete('moved.gcode')
+
+    def test_file_move_folder_not_exist(self, client, gcode):
+        client.upload(gcode.path)
+        with pytest.raises(RuntimeError):
+            client.copy(gcode.filename, '/random/path/moved.gcode')
+        client.delete(gcode.filename)
+    
+    def test_slice_curalegacy(self, client):
+        client.slice('biscuithelper.STL', slicer='curalegacy')
+        sleep(2)
+        files = client.files()
+        assert 'biscuithelper.gco' in [f['name'] for f in files['files']]
+        client.delete('biscuithelper.gco')
+    
+    @pytest.mark.parametrize('name', ('biscuits.gco', 'richtea.gcode'))
+    def test_slice_curalegacy_gcode(self, client, name):
+        client.slice('biscuithelper.STL', slicer='curalegacy', gcode=name)
+        sleep(2)
+        files = client.files()
+        assert name in [f['name'] for f in files['files']]
+        client.delete(name)
+    
+    def test_slice_curalegacy_select(self, client):
+        client.slice('biscuithelper.STL', slicer='curalegacy', select=True)
+        sleep(2)
+        files = client.files()
+        assert 'biscuithelper.gco' in [f['name'] for f in files['files']]
+        selected = client.job_info()['job']['file']['name']
+        assert selected == 'biscuithelper.gco'
+        client.delete('biscuithelper.gco')
 
     def test_upload_print_pause_cancel(self, client, gcode):
         client.upload(gcode.path)
@@ -194,22 +281,6 @@ class TestClient:
         client.cancel()
         cmd_wait(client, 'Cancelling')
         client.delete(gcode.filename)
-
-    def test_connection_info(self, client):
-        info = client.connection_info()
-
-        assert 'current' in info
-        assert 'baudrate' in info['current']
-        assert 'port' in info['current']
-        assert 'state' in info['current']
-
-        assert 'options' in info
-        assert 'baudrates' in info['options']
-        assert 'ports' in info['options']
-
-    def test_fake_ack(self, client):
-        client.fake_ack()
-        # TODO: What to check?
 
     def test_logs(self, client):
         logs = client.logs()
@@ -309,15 +380,15 @@ class TestClient:
             # And we don't do this for testing, but only with actual printer
             client.tool_target(0)
 
-    @pytest.mark.parametrize('how', (20, [20], {'tool0': 20}))
-    def test_set_tool_offset_to_20(self, client, how):
-        client.tool_offset(how)
-        tool = client.tool()
-        print(tool)
-        assert tool['tool0']['offset'] == 20.0
-        # TODO: make the above assert work?
-        if 'RECORD' in os.environ:
-            client.tool_offset(0)
+    # @pytest.mark.parametrize('how', (20, [20], {'tool0': 20}))
+    # def test_set_tool_offset_to_20(self, client, how):
+    #     client.tool_offset(how)
+    #     tool = client.tool()
+    #     print(tool)
+    #     assert tool['tool0']['offset'] == 20.0
+    #     # TODO: make the above assert work?
+    #     if 'RECORD' in os.environ:
+    #         client.tool_offset(0)
 
     def test_selecting_tool(self, client):
         # we are only testing if no exception occurred, there's no return
@@ -400,10 +471,27 @@ class TestClient:
         users = client.users()
         assert 'users' in users
 
-    # def test_disconnect(self, client):
-    #     print(client.printer())
-    #     client.disconnect()
-    #     assert client.state() in ['Offline', 'Closed']
+    ### CONNECTION HANDLING TESTS ###
+
+    def test_connection_info(self, client):
+        info = client.connection_info()
+
+        assert 'current' in info
+        assert 'baudrate' in info['current']
+        assert 'port' in info['current']
+        assert 'state' in info['current']
+
+        assert 'options' in info
+        assert 'baudrates' in info['options']
+        assert 'ports' in info['options']
+
+    def test_fake_ack(self, client):
+        # we are only testing if no exception occurred, there's no return
+        client.fake_ack()
+
+    def test_disconnect(self, client):
+        client.disconnect()
+        assert client.state() in ['Offline', 'Closed']
 
     def test_connect(self, client):
         '''
@@ -412,31 +500,10 @@ class TestClient:
         It is not possible to run it without it in record mode.
         TODO: Fix this
         '''
-        if client.state() in ['Offline', 'Closed']:
-            client.connect()
-            cmd_wait(client, 'Detecting baudrate')
-            assert client.state() in ['Connecting',
-                                    'Operational',
-                                    'Opening serial port']
-            cmd_wait_until(client, 'Operational')
-            print("TEST CONNECT")
-            print(client.printer())
-        else:
-            client.disconnect()
-            client.connect()
-            cmd_wait(client, 'Detecting baudrate')
-            assert client.state() in ['Connecting',
-                                    'Operational',
-                                    'Opening serial port']
-
-# client = OctoRest(url=URL, apikey=APIKEY)
-# printer = client.printer()
-# print(printer)
-# assert 'ready' in printer['sd']
-# assert printer['state']['flags']['operational']
-# assert printer['state']['flags']['ready']
-# assert not printer['state']['flags']['error']
-# assert not printer['state']['flags']['printing']
-# assert 'bed' in printer['temperature']
-# assert 'tool0' in printer['temperature']
-# assert 'history' not in printer['temperature']
+        client.connect()
+        cmd_wait(client, 'Detecting baudrate')
+        assert client.state() in ['Connecting',
+                                'Operational',
+                                'Opening serial port']
+        client.disconnect()
+        assert client.state() in ['Offline', 'Closed']
