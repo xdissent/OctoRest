@@ -207,9 +207,203 @@ class TestClient:
         assert 'baudrates' in info['options']
         assert 'ports' in info['options']
 
-    def test_disconnect(self, client):
-        client.disconnect()
-        assert client.state() in ['Offline', 'Closed']
+    def test_fake_ack(self, client):
+        client.fake_ack()
+        # TODO: What to check?
+
+    def test_logs(self, client):
+        logs = client.logs()
+        assert 'files' in logs
+        assert 'free' in logs
+        assert isinstance(logs['free'], int)
+
+    def test_delete_log(self, client):
+        logs = client.logs()
+        log_lst = [log['name'] for log in logs['files']]
+        assert log_lst[0] in log_lst
+        client.delete_log(log_lst[0])
+        logs = client.logs()
+        for log in logs['files']:
+            assert log['name'] != log_lst[0]
+
+    def test_printer(self, client):
+        printer = client.printer()
+        assert 'ready' in printer['sd']
+        assert printer['state']['flags']['operational']
+        assert printer['state']['flags']['ready']
+        assert not printer['state']['flags']['error']
+        assert not printer['state']['flags']['printing']
+    
+    def test_printer_temps(self, client):
+        printer = client.printer()
+        cmd_wait_until(client, 'Operational')
+        assert 'bed' in printer['temperature']
+        assert 'tool0' in printer['temperature']
+        assert 'history' not in printer['temperature']
+
+    @pytest.mark.parametrize('exclude', subsets('sd', 'temperature', 'state'))
+    def test_printer_with_excluded_stuff(self, client, exclude):
+        printer = client.printer(exclude=exclude)
+        for key in exclude:
+            assert key not in printer
+        assert len(printer) == 3 - len(exclude)
+
+    def test_printer_with_history(self, client):
+        printer = client.printer(history=True)
+        assert isinstance(printer['temperature']['history'], list)
+
+    @pytest.mark.parametrize('limit', range(1, 4))
+    def test_printer_with_history_and_limit(self, client, limit):
+        printer = client.printer(history=True, limit=limit)
+        assert len(printer['temperature']['history']) == limit
+
+    @pytest.mark.parametrize('key', ('actual', 'target', 'offset'))
+    @pytest.mark.parametrize('component', ('tool', 'bed'))
+    def test_tool_and_bed(self, client, key, component):
+        info = getattr(client, component)()  # client.tool() or bed()
+        assert 'history' not in info
+        assert isinstance(info[zero(component)][key], (float, int))
+
+    # @pytest.mark.parametrize('key', ('actual', 'target'))
+    # @pytest.mark.parametrize('component', ('tool', 'bed'))
+    # def test_tool_and_bed_with_history(self, client, key, component):
+    #     # TODO: history is not working with bed or tool, only printer
+    #     info = getattr(client, component)(history=True)
+    #     assert 'history' in info
+    #     for h in info['history']:
+    #         assert isinstance(h[zero(component)][key], (float, int))
+
+    # @pytest.mark.parametrize('limit', range(1, 4))
+    # @pytest.mark.parametrize('component', ('tool', 'bed'))
+    # def test_tool_and_bed_with_history_limit(self, client, limit, component):
+    #     # TODO: history is not working with bed or tool, only printer
+    #     info = getattr(client, component)(history=True, limit=limit)
+    #     assert len(info['history']) == limit
+
+    def test_home_all(self, client):
+        # we are only testing if no exception occurred, there's no return
+        client.home()
+
+    @pytest.mark.parametrize('axes', (('x',), ('y',), ('z',), ('x', 'y',)))
+    def test_home_some(self, client, axes):
+        # we are only testing if no exception occurred, there's no return
+        client.home(axes)
+
+    @pytest.mark.parametrize('coordinates', ((20, 0, 0), (0, 20, 0)))
+    def test_jog(self, client, coordinates):
+        # we are only testing if no exception occurred, there's no return
+        client.jog(*coordinates)
+
+    @pytest.mark.parametrize('factor', (100, 50, 150, 0.5, 1.0))
+    def test_feedrate(self, client, factor):
+        # we are only testing if no exception occurred, there's no return
+        client.feedrate(factor)
+
+    @pytest.mark.parametrize('how', (200, [200], {'tool0': 200}))
+    def test_set_tool_temperature_to_200(self, client, how):
+        client.tool_target(how)
+        tool = client.tool()
+        assert tool['tool0']['target'] == 200.0
+        if 'RECORD' in os.environ:
+            # Betamax had some problems here
+            # And we don't do this for testing, but only with actual printer
+            client.tool_target(0)
+
+    @pytest.mark.parametrize('how', (20, [20], {'tool0': 20}))
+    def test_set_tool_offset_to_20(self, client, how):
+        client.tool_offset(how)
+        tool = client.tool()
+        print(tool)
+        assert tool['tool0']['offset'] == 20.0
+        # TODO: make the above assert work?
+        if 'RECORD' in os.environ:
+            client.tool_offset(0)
+
+    def test_selecting_tool(self, client):
+        # we are only testing if no exception occurred, there's no return
+        client.tool_select(0)
+
+    def test_extruding(self, client):
+        # we are only testing if no exception occurred, there's no return
+        client.extrude(1)
+
+    def test_retracting(self, client):
+        # we are only testing if no exception occurred, there's no return
+        client.retract(1)
+
+    @pytest.mark.parametrize('factor', (100, 75, 125, 0.75, 1.0))
+    def test_flowrate(self, client, factor):
+        # we are only testing if no exception occurred, there's no return
+        client.flowrate(factor)
+
+    def test_set_bed_temperature_to_100(self, client):
+        client.bed_target(100)
+        bed = client.bed()
+        assert bed['bed']['target'] == 100.0
+        if 'RECORD' in os.environ:
+            client.bed_target(0)
+
+    def test_set_bed_offset_to_10(self, client):
+        client.bed_offset(10)
+        bed = client.bed()
+        assert bed['bed']['offset'] == 10.0
+        if 'RECORD' in os.environ:
+            client.bed_offset(0)
+
+    def test_sd_card_init(self, client):
+        client.sd_init()
+
+    def test_sd_card_refresh(self, client):
+        client.sd_refresh()
+
+    def test_sd_card_release(self, client):
+        client.sd_release()
+
+    def test_sd_card_status(self, client):
+        sd = client.sd()
+        # no SD card here, so always not ready
+        assert sd['ready'] is False
+
+    def test_single_gcode_command(self, client):
+        client.gcode('G28 X')
+
+    def test_multiple_gcode_commands_nl(self, client):
+        client.gcode('G28 X\nG28 Y')
+
+    def test_multiple_gcode_commands_list(self, client):
+        client.gcode(['G28 X', 'G28 Y'])
+
+    def test_get_settings(self, client):
+        settings = client.settings()
+        assert 'api' in settings
+        assert 'appearance' in settings
+
+    def test_unchanged_settings(self, client):
+        settings = client.settings()
+        new_settings = client.settings({})
+        assert settings['api'] == new_settings['api']
+        assert settings['appearance'] == new_settings['appearance']
+
+    def test_change_settings(self, client):
+        settings = client.settings()
+        printer_name = settings['appearance']['name']
+        test_name = {'appearance': {'name': 'Gandalf'}}
+        new_settings = client.settings(test_name)
+        assert new_settings['appearance']['name'] == 'Gandalf'
+        client.settings({'appearance': {'name': printer_name}})
+    
+    # def test_tmp_session_key(self, client):
+    #     key = client.tmp_session_key()
+    #     print(key)
+    
+    def test_users(self, client):
+        users = client.users()
+        assert 'users' in users
+
+    # def test_disconnect(self, client):
+    #     print(client.printer())
+    #     client.disconnect()
+    #     assert client.state() in ['Offline', 'Closed']
 
     def test_connect(self, client):
         '''
@@ -224,6 +418,9 @@ class TestClient:
             assert client.state() in ['Connecting',
                                     'Operational',
                                     'Opening serial port']
+            cmd_wait_until(client, 'Operational')
+            print("TEST CONNECT")
+            print(client.printer())
         else:
             client.disconnect()
             client.connect()
@@ -232,188 +429,14 @@ class TestClient:
                                     'Operational',
                                     'Opening serial port']
 
-    def test_fake_ack(self, client):
-        client.fake_ack()
-        # TODO: What to check?
-
-    def test_logs(self, client):
-        logs = client.logs()
-        assert 'files' in logs
-        assert 'free' in logs
-        assert isinstance(logs['free'], int)
-
-    def test_delete_log(self, client):
-        logs = client.logs()
-        log_lst = [log['name'] for log in logs['files']]
-        assert 'octoprint.log' in log_lst
-        client.delete_log('octoprint.log')
-        logs = client.logs()
-        for log in logs['files']:
-            assert log['name'] != 'octoprint.log'
-
-    def test_printer(self, client):
-        printer = client.printer()
-        assert 'ready' in printer['sd']
-        assert printer['state']['flags']['operational']
-        assert printer['state']['flags']['ready']
-        assert not printer['state']['flags']['error']
-        assert not printer['state']['flags']['printing']
-        assert 'bed' in printer['temperature']
-        assert 'tool0' in printer['temperature']
-        assert 'history' not in printer['temperature']
-
-    # @pytest.mark.parametrize('exclude', subsets('sd', 'temperature', 'state'))
-    # def test_printer_with_excluded_stuff(self, client, exclude):
-    #     printer = client.printer(exclude=exclude)
-    #     for key in exclude:
-    #         assert key not in printer
-    #     assert len(printer) == 3 - len(exclude)
-
-    # def test_printer_with_history(self, client):
-    #     printer = client.printer(history=True)
-    #     assert isinstance(printer['temperature']['history'], list)
-
-    # @pytest.mark.parametrize('limit', range(1, 4))
-    # def test_printer_with_history_and_limit(self, client, limit):
-    #     printer = client.printer(history=True, limit=limit)
-    #     assert len(printer['temperature']['history']) == limit
-
-    # @pytest.mark.parametrize('key', ('actual', 'target', 'offset'))
-    # @pytest.mark.parametrize('component', ('tool', 'bed'))
-    # def test_tool_and_bed(self, client, key, component):
-    #     info = getattr(client, component)()  # client.tool() or bed()
-    #     assert 'history' not in info
-    #     assert isinstance(info[zero(component)][key], (float, int))
-
-    # @pytest.mark.parametrize('key', ('actual', 'target'))
-    # @pytest.mark.parametrize('component', ('tool', 'bed'))
-    # def test_tool_and_bed_with_history(self, client, key, component):
-    #     info = getattr(client, component)(history=True)
-    #     assert 'history' in info
-    #     for h in info['history']:
-    #         assert isinstance(h[zero(component)][key], (float, int))
-
-    # @pytest.mark.parametrize('limit', range(1, 4))
-    # @pytest.mark.parametrize('component', ('tool', 'bed'))
-    # def test_tool_and_bed_with_history_limit(self, client, limit, component):
-    #     info = getattr(client, component)(history=True, limit=limit)
-    #     assert len(info['history']) == limit
-
-    # def test_home_all(self, client):
-    #     # we are only testing if no exception occurred, there's no return
-    #     client.home()
-
-    # @pytest.mark.parametrize('axes', (('x',), ('y',), ('z',), ('x', 'y',)))
-    # def test_home_some(self, client, axes):
-    #     # we are only testing if no exception occurred, there's no return
-    #     client.home(axes)
-
-    # @pytest.mark.parametrize('coordinates', ((20, 0, 0), (0, 20, 0)))
-    # def test_jog(self, client, coordinates):
-    #     # we are only testing if no exception occurred, there's no return
-    #     client.jog(*coordinates)
-
-    # @pytest.mark.parametrize('factor', (100, 50, 150, 0.5, 1.0))
-    # def test_feedrate(self, client, factor):
-    #     # we are only testing if no exception occurred, there's no return
-    #     client.feedrate(factor)
-
-    # @pytest.mark.parametrize('how', (200, [200], {'tool0': 200}))
-    # def test_set_tool_temperature_to_200(self, client, how):
-    #     client.tool_target(how)
-    #     tool = client.tool()
-    #     assert tool['tool0']['target'] == 200.0
-    #     if 'RECORD' in os.environ:
-    #         # Betamax had some problems here
-    #         # And we don't do this for testing, but only with actual printer
-    #         client.tool_target(0)
-
-    # @pytest.mark.parametrize('how', (20, [20], {'tool0': 20}))
-    # def test_set_tool_offset_to_20(self, client, how):
-    #     client.tool_offset(how)
-    #     # tool = client.tool()
-    #     # assert tool['tool0']['offset'] == 20.0
-    #     # TODO make the above assert work?
-    #     if 'RECORD' in os.environ:
-    #         client.tool_offset(0)
-
-    # def test_selecting_tool(self, client):
-    #     # we are only testing if no exception occurred, there's no return
-    #     client.tool_select(0)
-
-    # def test_extruding(self, client):
-    #     # we are only testing if no exception occurred, there's no return
-    #     client.extrude(1)
-
-    # def test_retracting(self, client):
-    #     # we are only testing if no exception occurred, there's no return
-    #     client.retract(1)
-
-    # @pytest.mark.parametrize('factor', (100, 75, 125, 0.75, 1.0))
-    # def test_flowrate(self, client, factor):
-    #     # we are only testing if no exception occurred, there's no return
-    #     client.flowrate(factor)
-
-    # def test_set_bed_temperature_to_100(self, client):
-    #     client.bed_target(100)
-    #     bed = client.bed()
-    #     assert bed['bed']['target'] == 100.0
-    #     if 'RECORD' in os.environ:
-    #         client.bed_target(0)
-
-    # def test_set_bed_offset_to_10(self, client):
-    #     client.bed_offset(10)
-    #     bed = client.bed()
-    #     assert bed['bed']['offset'] == 10.0
-    #     if 'RECORD' in os.environ:
-    #         client.bed_offset(0)
-
-    # def test_sd_card_init(self, client):
-    #     client.sd_init()
-
-    # def test_sd_card_refresh(self, client):
-    #     client.sd_refresh()
-
-    # def test_sd_card_release(self, client):
-    #     client.sd_release()
-
-    # def test_sd_card_status(self, client):
-    #     sd = client.sd()
-    #     # no SD card here, so always not ready
-    #     assert sd['ready'] is False
-
-    # def test_single_gcode_command(self, client):
-    #     client.gcode('G28 X')
-
-    # def test_multiple_gcode_commands_nl(self, client):
-    #     client.gcode('G28 X\nG28 Y')
-
-    # def test_multiple_gcode_commands_list(self, client):
-    #     client.gcode(['G28 X', 'G28 Y'])
-
-    # def test_get_settings(self, client):
-    #     settings = client.settings()
-    #     assert 'api' in settings
-    #     assert settings['api']['enabled'] is True
-
-    # def test_unchanged_settings(self, client):
-    #     settings = client.settings()
-    #     new_settings = client.settings({})
-    #     print(new_settings)
-    #     assert settings['api']['enabled'] == new_settings['api']['enabled']
-
-    # def test_change_settings(self, client):
-    #     settings = client.settings()
-    #     printer_name = settings['appearance']['name']
-    #     test_name = {'appearance': {'name': 'Test'}}
-    #     new_settings = client.settings(test_name)
-    #     assert new_settings['appearance']['name'] == 'Test'
-    #     client.settings({'appearance': {'name': printer_name}})
-    
-    # def test_tmp_session_key(self, client):
-    #     key = client.tmp_session_key()
-    #     print(key)
-    
-    # def test_users(self, client):
-    #     users = client.users()
-    #     print(users)
+# client = OctoRest(url=URL, apikey=APIKEY)
+# printer = client.printer()
+# print(printer)
+# assert 'ready' in printer['sd']
+# assert printer['state']['flags']['operational']
+# assert printer['state']['flags']['ready']
+# assert not printer['state']['flags']['error']
+# assert not printer['state']['flags']['printing']
+# assert 'bed' in printer['temperature']
+# assert 'tool0' in printer['temperature']
+# assert 'history' not in printer['temperature']

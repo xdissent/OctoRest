@@ -148,6 +148,9 @@ class OctoRest:
         Retrieve a temporary session key with a minimum validity. 
         It can only be used as a proper API key after having been verified.
         Returns the temporary session key and the timestamp until it’s valid.
+
+        Deprecated since version 1.3.11: This functionality will be removed in 1.4.0.
+        Use the Application Keys Plugin workflow instead.
         """
         return self._get('/apps/auth')
 
@@ -157,6 +160,9 @@ class OctoRest:
         credentials and a cryptographic signature over these credentials
         and the temporary key.
         Returns the now verified session key and the new validity.
+
+        Deprecated since version 1.3.11: This functionality will be removed in 1.4.0.
+        Use the Application Keys Plugin workflow instead.
         """
         return self._post('/apps/auth')
 
@@ -470,7 +476,7 @@ class OctoRest:
         if kwargs.get('exclude'):
             params['exclude'] = ','.join(kwargs['exclude'])
         if kwargs.get('history'):
-            params['history'] = 'true'
+            params['history'] = 'true' # or 'yes' or 'y' or '1'
         if kwargs.get('limit'):
             params['limit'] = kwargs['limit']
         return self._get(url, params=params)
@@ -496,7 +502,7 @@ class OctoRest:
         return self._hwinfo('/api/printer', exclude=exclude,
                             history=history, limit=limit)
 
-    def tool(self, *, history=False, limit=None):
+    def tool(self, history=False, limit=None):
         """
         Retrieves the current temperature data (actual, target and offset) plus
         optionally a (limited) history (actual, target, timestamp) for all of
@@ -509,7 +515,7 @@ class OctoRest:
         return self._hwinfo('/api/printer/tool',
                             history=history, limit=limit)
 
-    def bed(self, *, history=False, limit=None):
+    def bed(self, history=False, limit=None):
         """
         Retrieves the current temperature data (actual, target and offset) plus
         optionally a (limited) history (actual, target, timestamp) for the
