@@ -13,9 +13,10 @@ before_install:
 - git clone https://github.com/foosel/OctoPrint.git
 - cd OctoPrint
 install:
-- pip install --upgrade pip
-- pip install -e .[develop]
-- python setup.py install
+- pip2 install --upgrade pip
+- pip2 install -e .[develop]
+- cd ~/
+- python3 setup.py install
 script:
 - octoprint serve --port 5000
-- python setup.py test
+- python3 setup.py test
