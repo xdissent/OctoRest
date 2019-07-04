@@ -10,6 +10,10 @@
 OctoRest
 ===========================
 
+.. image:: https://travis-ci.org/dougbrion/OctoRest.svg?branch=master
+    :target: https://travis-ci.org/dougbrion/OctoRest
+
+
 Python client library for OctoPrint REST API
 
 This is continued work after the great start by Miro Hrončok of covering the
