@@ -67,8 +67,8 @@ Maybe you want to stop your print and then subsequently home the printer. This i
         Args:
             client - the OctoRest client 
         """
-        print("Pausing the print!")
-        client.pause()
+        print("toggling the print!")
+        client.toggle()
         print("Homing your 3d printer...")
         client.home()
 
