@@ -173,7 +173,7 @@ class TestClient:
         client.select(gcode.filename)
         selected = client.job_info()['job']['file']['name']
         assert selected == gcode.filename
-        client.print()
+        client.start()
         sleep(1)
         assert client.state() == 'Printing'
         client.cancel()
@@ -260,11 +260,10 @@ class TestClient:
     def test_upload_print_pause_cancel(self, client, gcode):
         client.upload(gcode.path)
         client.select(gcode.filename, print=True)
-        sleep(1)
+        cmd_wait_until(client, 'Printing')
         client.pause()
         cmd_wait(client, 'Pausing')
         assert client.state() == 'Paused'
-        sleep(1)
         client.cancel()
         cmd_wait(client, 'Cancelling')
         client.delete(gcode.filename)
@@ -272,11 +271,51 @@ class TestClient:
     def test_upload_print_pause_restart(self, client, gcode):
         client.upload(gcode.path)
         client.select(gcode.filename, print=True)
-        sleep(1)
+        cmd_wait_until(client, 'Printing')
         client.pause()
         cmd_wait_until(client, 'Paused')
+        assert client.state() == 'Paused'
         client.restart()
-        sleep(2)
+        cmd_wait_until(client, 'Printing')
+        assert client.state() == 'Printing'
+        client.cancel()
+        cmd_wait(client, 'Cancelling')
+        client.delete(gcode.filename)
+    
+    def test_upload_print_pause_resume(self, client, gcode):
+        client.upload(gcode.path)
+        client.select(gcode.filename, print=True)
+        cmd_wait_until(client, 'Printing')
+        client.pause()
+        cmd_wait_until(client, 'Paused')
+        assert client.state() == 'Paused'
+        client.resume()
+        cmd_wait_until(client, 'Printing')
+        assert client.state() == 'Printing'
+        client.cancel()
+        cmd_wait(client, 'Cancelling')
+        client.delete(gcode.filename)
+    
+    def test_upload_print_toggle(self, client, gcode):
+        client.upload(gcode.path)
+        client.select(gcode.filename, print=True)
+        cmd_wait_until(client, 'Printing')
+        client.toggle()
+        cmd_wait_until(client, 'Paused')
+        assert client.state() == 'Paused'
+        client.cancel()
+        cmd_wait(client, 'Cancelling')
+        client.delete(gcode.filename)
+
+    def test_upload_print_toggle_toggle(self, client, gcode):
+        client.upload(gcode.path)
+        client.select(gcode.filename, print=True)
+        cmd_wait_until(client, 'Printing')
+        client.toggle()
+        cmd_wait_until(client, 'Paused')
+        assert client.state() == 'Paused'
+        client.toggle()
+        cmd_wait_until(client, 'Printing')
         assert client.state() == 'Printing'
         client.cancel()
         cmd_wait(client, 'Cancelling')
@@ -507,3 +546,15 @@ class TestClient:
                                 'Opening serial port']
         client.disconnect()
         assert client.state() in ['Offline', 'Closed']
+    
+import json
+client = OctoRest(url=URL, apikey=APIKEY)
+client.new_folder('hello')
+f = client.files(recursive=False)
+print(json.dumps(f, indent=4))
+g = client.files(recursive=True)
+print(json.dumps(f, indent=4))
+print(f == g)
+print(client.version)
+client.gcode("M106")
+client.gcode("M106 \n G28 X Y Z \n M107")

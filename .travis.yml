@@ -6,13 +6,13 @@ python:
 - "3.5-dev"  # 3.5 development branch
 - "3.6"
 - "3.6-dev"  # 3.6 development branch
-- 'pypy3.3-5.5-alpha'
 env:
 - OCTOPRINT_URL="http://localhost:5000/" OCTOPRINT_APIKEY="apikey"
 before_install:
 - |
   deactivate
   cd ~/
+  ls
   git clone https://github.com/foosel/OctoPrint.git
   cd OctoPrint
   virtualenv -p python2.7 octoprint-venv
@@ -22,8 +22,8 @@ before_install:
   pip2 install -e .[develop]
   deactivate
 install:
-- cd ~/OctoRest/
+- cd ~/dougbrion/OctoRest/
 - python3 setup.py install
 script:
-- octoprint serve --port 5000
+- octoprint serve --port 5000 &
 - python3 setup.py test

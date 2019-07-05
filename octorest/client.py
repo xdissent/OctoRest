@@ -1,5 +1,5 @@
-from contextlib import contextmanager
 import os
+from contextlib import contextmanager
 from urllib import parse as urlparse
 
 import requests
@@ -131,20 +131,32 @@ class OctoRest:
             msg = msg.format(response.url, error, response.status_code)
             raise RuntimeError(msg)
         return response
+    
+    ###########################
+    ### VERSION INFORMATION ###
+    ###########################
+
+    def _version_tuple(self, v):
+        return tuple(map(int, (v.split("."))))
 
     def get_version(self):
         """
+        Version information
+        http://docs.octoprint.org/en/master/api/version.html#version-information
+
         Retrieve information regarding server and API version
         """
         return self._get('/api/version')
-
-    def _prepend_local(self, location):
-        if location.split('/')[0] not in ('local', 'sdcard'):
-            return 'local/' + location
-        return location
+    
+    ###########################
+    ### APPS - SESSION KEYS ###
+    ###########################
 
     def tmp_session_key(self):
         """
+        Obtaining a temporary session key
+        http://docs.octoprint.org/en/master/api/apps.html#obtaining-a-temporary-session-key
+
         Retrieve a temporary session key with a minimum validity. 
         It can only be used as a proper API key after having been verified.
         Returns the temporary session key and the timestamp until it’s valid.
@@ -156,6 +168,9 @@ class OctoRest:
 
     def verify_tmp_session_key(self):
         """
+        Verifying a temporary session key
+        http://docs.octoprint.org/en/master/api/apps.html#id5
+
         Verify a formerly retrieved temporary session key by providing 
         credentials and a cryptographic signature over these credentials
         and the temporary key.
@@ -165,158 +180,16 @@ class OctoRest:
         Use the Application Keys Plugin workflow instead.
         """
         return self._post('/apps/auth')
-
-    def files(self, location=None):
-        """
-        Retrieve information regarding all files currently available and
-        regarding the disk space still available locally in the system
-
-        If location is used, retrieve information regarding the files currently
-        available on the selected location and - if targeting the local
-        location - regarding the disk space still available locally in the
-        system
-
-        If location is a file, retrieves the selected file''s information
-        """
-        if location:
-            location = self._prepend_local(location)
-            return self._get('/api/files/{}'.format(location))
-        return self._get('/api/files')
-
-    @contextmanager
-    def _file_tuple(self, file):
-        """
-        Yields a tuple with filename and file object
-
-        Expects the same thing or a path as input
-        """
-        mime = 'application/octet-stream'
-
-        try:
-            exists = os.path.exists(file)
-        except:
-            exists = False
-
-        if exists:
-            filename = os.path.basename(file)
-            with open(file, 'rb') as f:
-                yield (filename, f, mime)
-        else:
-            yield file + (mime,)
     
-    def files_info(self, location, filename):
-        """
-        Retrieves the selected file’s or folder’s information.
-        If the file is unknown, a 404 Not Found is returned.
-        If the targeted path is a folder, by default only its direct children 
-        will be returned. If recursive is provided and set to true, all 
-        sub folders and their children will be returned too.
-        On success, a 200 OK is returned, with a file information item as 
-        the response body.
-        """
-        return self._get('/api/files/{}/{}'.format(location, filename))
-
-
-    def upload(self, file, *, location='local',
-               select=False, print=False, userdata=None):
-        """
-        Upload a given file
-        It can be a path or a tuple with a filename and a file-like object
-        """
-        with self._file_tuple(file) as file_tuple:
-            files = {'file': file_tuple}
-            data = {'select': str(select).lower(), 'print': str(print).lower()}
-            if userdata:
-                data['userdata'] = userdata
-
-            return self._post('/api/files/{}'.format(location),
-                              files=files, data=data)
-
-    def new_folder(self, folder_name, location='local'):
-        """
-        To create a new folder, the request body must at least contain the foldername
-        form field, specifying the name of the new folder. Note that folder creation
-        is currently only supported on the local file system.
-        """
-        data = {
-            'foldername': folder_name,
-        }
-        return self._post('/api/files/{}'.format(location), data=data)
-
-    def delete(self, location):
-        """
-        Delete the selected filename on the selected target
-
-        Location is target/filename, defaults to local/filename
-        """
-        location = self._prepend_local(location)
-        self._delete('/api/files/{}'.format(location))
-
-    def select(self, location, *, print=False):
-        """
-        Selects a file for printing
-
-        Location is target/filename, defaults to local/filename
-        If print is True, the selected file starts to print immediately
-        """
-        location = self._prepend_local(location)
-        data = {
-            'command': 'select',
-            'print': print,
-        }
-        self._post('/api/files/{}'.format(location), json=data, ret=False)
-    
-    def slice(self, location, slicer='curalegacy', gcode=None, position=None, printer_profile=None, 
-              profile=None, select=False, print=False):
-        """
-        Slices an STL file into GCODE. 
-        Note that this is an asynchronous operation that 
-        will take place in the background after the response 
-        has been sent back to the client.
-
-        TODO: ADD PROFILE.*
-        """
-        location = self._prepend_local(location)
-        data = {
-            'command': 'slice',
-            'slicer': slicer,
-            'select': select,
-            'print': print,
-        }
-        if not gcode == None:
-            data['gcode'] = gcode
-        if not position == None:
-            data['position'] = position
-        if not printer_profile == None:
-            data['printerProfile'] = printer_profile
-        if not profile == None:
-            data['profile'] = profile
-        return self._post('/api/files/{}'.format(location), json=data, ret=False)
-    
-    def copy(self, location, dest):
-        """
-        Copies the file or folder to a new destination on the same location
-        """
-        location = self._prepend_local(location)
-        data = {
-            'command': 'copy',
-            'destination': dest,
-        }
-        return self._post('/api/files/{}'.format(location), json=data, ret=False)
-    
-    def move(self, location, dest):
-        """
-        Moves the file or folder to a new destination on the same location
-        """
-        location = self._prepend_local(location)
-        data = {
-            'command': 'move',
-            'destination': dest,
-        }
-        return self._post('/api/files/{}'.format(location), json=data, ret=False)
+    ###########################
+    ### CONNECTION HANDLING ###
+    ###########################
 
     def connection_info(self):
         """
+        Get connection settings
+        http://docs.octoprint.org/en/master/api/connection.html#id2
+
         Retrieve the current connection settings, including information
         regarding the available baudrates and serial ports and the
         current connection state.
@@ -332,6 +205,9 @@ class OctoRest:
     def connect(self, *, port=None, baudrate=None,
                 printer_profile=None, save=None, autoconnect=None):
         """
+        Issue a connection command
+        http://docs.octoprint.org/en/master/api/connection.html#id3
+
         Instructs OctoPrint to connect to the printer
 
         port: Optional, specific port to connect to. If not set the current
@@ -368,6 +244,9 @@ class OctoRest:
 
     def disconnect(self):
         """
+        Issue a connection command
+        http://docs.octoprint.org/en/master/api/connection.html#id3
+
         Instructs OctoPrint to disconnect from the printer
         """
         data = {'command': 'disconnect'}
@@ -375,6 +254,9 @@ class OctoRest:
 
     def fake_ack(self):
         """
+        Issue a connection command
+        http://docs.octoprint.org/en/master/api/connection.html#id3
+
         Fakes an acknowledgment message for OctoPrint in case one got lost on
         the serial line and the communication with the printer since stalled.
         This should only be used in "emergencies" (e.g. to save prints), the
@@ -383,24 +265,246 @@ class OctoRest:
         """
         data = {'command': 'fake_ack'}
         self._post('/api/connection', json=data, ret=False)
+    
+    #######################
+    ### FILE OPERATIONS ###
+    #######################
+    
+    def _prepend_local(self, location):
+        if location.split('/')[0] not in ('local', 'sdcard'):
+            return 'local/' + location
+        return location
 
-    def job_info(self):
-        """
-        Retrieve information about the current job (if there is one)
-        """
-        return self._get('/api/job')
+    def files(self, location=None, recursive=False):
+        """Retrieve all files
+        http://docs.octoprint.org/en/master/api/files.html#id2
 
-    def print(self):
+        Retrieve files from specific location 
+        http://docs.octoprint.org/en/master/api/files.html#id3
+
+        Retrieve information regarding all files currently available and
+        regarding the disk space still available locally in the system
+
+        If location is used, retrieve information regarding the files currently
+        available on the selected location and - if targeting the local
+        location - regarding the disk space still available locally in the
+        system
+
+        If location is a file, retrieves the selected file''s information
+
+        Args:	
+            location: The origin location from which to retrieve the files.
+                      Currently only local and sdcard are supported, with local
+                      referring to files stored in OctoPrint’s uploads folder
+                      and sdcard referring to files stored on the printer’s
+                      SD card (if available).
+            recursive: If set to true, return all files and folders recursively.
+                       Otherwise only return items on same level.
+
+        TODO: Recursive appears to always be on
         """
+        payload = {'recursive': str(recursive).lower()}
+        if location:
+            location = self._prepend_local(location)
+            return self._get('/api/files/{}'.format(location), params=payload)
+        return self._get('/api/files', params=payload)
+
+    @contextmanager
+    def _file_tuple(self, file):
+        """
+        Yields a tuple with filename and file object
+
+        Expects the same thing or a path as input
+        """
+        mime = 'application/octet-stream'
+
+        try:
+            exists = os.path.exists(file)
+        except:
+            exists = False
+
+        if exists:
+            filename = os.path.basename(file)
+            with open(file, 'rb') as f:
+                yield (filename, f, mime)
+        else:
+            yield file + (mime,)
+    
+    def files_info(self, location, filename, recursive=False):
+        """Retrieve a specific file’s or folder’s information
+        http://docs.octoprint.org/en/master/api/files.html#id5
+
+        Retrieves the selected file’s or folder’s information.
+        If the file is unknown, a 404 Not Found is returned.
+        If the targeted path is a folder, by default only its direct children 
+        will be returned. If recursive is provided and set to true, all 
+        sub folders and their children will be returned too.
+        On success, a 200 OK is returned, with a file information item as 
+        the response body.
+        """
+        payload = {'recursive': str(recursive).lower()}
+        return self._get('/api/files/{}/{}'.format(location, filename), params=payload)
+
+
+    def upload(self, file, *, location='local',
+               select=False, print=False, userdata=None, path=None):
+        """Upload file or create folder
+        http://docs.octoprint.org/en/master/api/files.html#id4
+
+        Upload a given file
+        It can be a path or a tuple with a filename and a file-like object
+        """
+        with self._file_tuple(file) as file_tuple:
+            files = {'file': file_tuple}
+            data = {
+                'select': str(select).lower(),
+                'print': str(print).lower()
+            }
+            if userdata:
+                data['userdata'] = userdata
+            if path:
+                data['path'] = path
+
+            return self._post('/api/files/{}'.format(location),
+                              files=files, data=data)
+
+    def new_folder(self, folder_name, location='local'):
+        """Upload file or create folder
+        http://docs.octoprint.org/en/master/api/files.html#id4
+
+        To create a new folder, the request body must at least contain the foldername
+        form field, specifying the name of the new folder. Note that folder creation
+        is currently only supported on the local file system.
+        """
+        data = {
+            'foldername': folder_name,
+        }
+        return self._post('/api/files/{}'.format(location), data=data)
+
+    def select(self, location, *, print=False):
+        """Issue a file command
+        http://docs.octoprint.org/en/master/api/files.html#id6
+
+        Selects a file for printing
+
+        Location is target/filename, defaults to local/filename
+        If print is True, the selected file starts to print immediately
+        """
+        location = self._prepend_local(location)
+        data = {
+            'command': 'select',
+            'print': print,
+        }
+        self._post('/api/files/{}'.format(location), json=data, ret=False)
+    
+    def slice(self, location, slicer='curalegacy', gcode=None, position=None, printer_profile=None, 
+              profile=None, select=False, print=False):
+        """Issue a file command
+        http://docs.octoprint.org/en/master/api/files.html#id6
+
+        Slices an STL file into GCODE. 
+        Note that this is an asynchronous operation that 
+        will take place in the background after the response 
+        has been sent back to the client.
+
+        TODO: ADD PROFILE.*
+        """
+        location = self._prepend_local(location)
+        data = {
+            'command': 'slice',
+            'slicer': slicer,
+            'select': select,
+            'print': print,
+        }
+        if not gcode == None:
+            data['gcode'] = gcode
+        if not position == None:
+            data['position'] = position
+        if not printer_profile == None:
+            data['printerProfile'] = printer_profile
+        if not profile == None:
+            data['profile'] = profile
+        return self._post('/api/files/{}'.format(location), json=data, ret=False)
+    
+    def copy(self, location, dest):
+        """Issue a file command
+        http://docs.octoprint.org/en/master/api/files.html#id6
+
+        Copies the file or folder to a new destination on the same location
+        """
+        location = self._prepend_local(location)
+        data = {
+            'command': 'copy',
+            'destination': dest,
+        }
+        return self._post('/api/files/{}'.format(location), json=data, ret=False)
+    
+    def move(self, location, dest):
+        """Issue a file command
+        http://docs.octoprint.org/en/master/api/files.html#id6
+        
+        Moves the file or folder to a new destination on the same location
+        """
+        location = self._prepend_local(location)
+        data = {
+            'command': 'move',
+            'destination': dest,
+        }
+        return self._post('/api/files/{}'.format(location), json=data, ret=False)
+    
+    def delete(self, location):
+        """Delete file
+        http://docs.octoprint.org/en/master/api/files.html#delete-file
+
+        Delete the selected filename on the selected target
+
+        Location is target/filename, defaults to local/filename
+        """
+        location = self._prepend_local(location)
+        self._delete('/api/files/{}'.format(location))
+    
+    ######################
+    ### JOB OPERATIONS ###
+    ######################
+
+    def start(self):
+        """Issue a job command
+        http://docs.octoprint.org/en/master/api/job.html#id2
+
         Starts the print of the currently selected file
 
         Use select() to select a file
         """
         data = {'command': 'start'}
         self._post('/api/job', json=data, ret=False)
+    
+    def cancel(self):
+        """Issue a job command
+        http://docs.octoprint.org/en/master/api/job.html#id2
+
+        Cancels the current print job
+
+        There must be an active print job for this to work
+        """
+        data = {'command': 'cancel'}
+        self._post('/api/job', json=data, ret=False)
+    
+    def restart(self):
+        """Issue a job command
+        http://docs.octoprint.org/en/master/api/job.html#id2
+
+        Restart the print of the currently selected file from the beginning
+
+        There must be an active print job for this to work and the print job
+        must currently be paused
+        """
+        data = {'command': 'restart'}
+        self._post('/api/job', json=data, ret=False)
 
     def pause_command(self, action):
-        """
+        """Issue a job command
+        http://docs.octoprint.org/en/master/api/job.html#id2
+        
         Pauses/resumes/toggles the current print job.
         Accepts one optional additional parameter action specifying
         which action to take.
@@ -427,59 +531,121 @@ class OctoRest:
         self._post('/api/job', json=data, ret=False)
     
     def pause(self):
-        """
+        """Issue a job command
+        http://docs.octoprint.org/en/master/api/job.html#id2
+
         Pauses the current job if it’s printing,
         does nothing if it’s already paused.
         """
         self.pause_command(action='pause')
 
     def resume(self):
-        """
+        """Issue a job command
+        http://docs.octoprint.org/en/master/api/job.html#id2
+
         Resumes the current job if it’s paused,
         does nothing if it’s printing.
         """
         self.pause_command(action='resume')
     
     def toggle(self):
-        """
+        """Issue a job command
+        http://docs.octoprint.org/en/master/api/job.html#id2
+
         Toggles the pause state of the job,
         pausing it if it’s printing and resuming it
         if it’s currently paused.
         """
         self.pause_command(action='toggle')
+    
+    def job_info(self):
+        """Retrieve information about the current job
+        http://docs.octoprint.org/en/master/api/job.html#id3
 
-    def restart(self):
+        Retrieve information about the current job (if there is one)
         """
-        Restart the print of the currently selected file from the beginning
+        return self._get('/api/job')
+    
+    #################
+    ### LANGUAGES ###
+    #################
 
-        There must be an active print job for this to work and the print job
-        must currently be paused
+    def languages(self):
+        """Retrieve installed language packs
+        http://docs.octoprint.org/en/master/api/languages.html#id2
+
+        Retrieves a list of installed language packs.
         """
-        data = {'command': 'restart'}
-        self._post('/api/job', json=data, ret=False)
+        return self._get('/api/languages')
+    
+    def upload_language(self, file):
+        """Upload a language pack
+        http://docs.octoprint.org/en/master/api/languages.html#id3
 
-    def cancel(self):
+        Uploads a new language pack to OctoPrint.
+        Other than most of the other requests on OctoPrint’s API which are
+        expected as JSON, this request is expected as 
+        Content-Type: multipart/form-data due to the included file upload.
+        To upload a file, the request body must contain the file form field 
+        with the contents and file name of the file to upload.
+        Only files with one of the extensions zip, tar.gz, tgz or tar will 
+        be processed, for other file extensions a 400 Bad Request will be returned.
+        Will return a list of installed language packs upon completion, 
+        as described in Retrieve installed language packs.
+
+        Parameters:
+            file – The language pack file to upload
         """
-        Cancels the current print job
+        with self._file_tuple(file) as file_tuple:
+            files = {'file': file_tuple}
 
-        There must be an active print job for this to work
+            return self._post('/api/languages', files=files)
+    
+    def delete_language(self, locale, pack):
+        """Delete a language pack
+        http://docs.octoprint.org/en/master/api/languages.html#id4
+
+        Retrieves a list of installed language packs.
         """
-        data = {'command': 'cancel'}
-        self._post('/api/job', json=data, ret=False)
-
+        return self._delete('/api/languages/{}/{}'.format(locale, pack))
+    
+    ###########################
+    ### LOG FILE MANAGEMENT ###
+    ###########################
+    
     def logs(self):
-        """
+        """Retrieve a list of available log files
+        http://docs.octoprint.org/en/master/bundledplugins/logging.html#retrieve-a-list-of-available-log-files
+
+        Log file management (and logging configuration) was moved into
+        a bundled plugin in OctoPrint 1.3.7.
+
         Retrieve information regarding all log files currently available
         and regarding the disk space still available in the system on the
         location the log files are being stored
         """
-        return self._get('/api/logs')
+        version = self._version_tuple(self.version['server'])
+        if version < self._version_tuple('1.3.7'):
+            return self._get('/api/logs')
+        return self._get('/plugin/logging/logs')
 
     def delete_log(self, filename):
-        """
+        """Delete a specific logfile
+        http://docs.octoprint.org/en/master/bundledplugins/logging.html#delete-a-specific-logfile
+
+        Log file management (and logging configuration) was moved into
+        a bundled plugin in OctoPrint 1.3.7.
+
         Delete the selected log file with name filename
         """
-        self._delete('/api/logs/{}'.format(filename))
+        version = self._version_tuple(self.version['server'])
+        if version < self._version_tuple('1.3.7'):
+            self._delete('/api/logs/{}'.format(filename))
+        self._delete('/plugin/logging/logs/{}'.format(filename))
+    
+    ##########################
+    ### PRINTER OPERATIONS ###
+    ##########################
 
     def _hwinfo(self, url, **kwargs):
         """
@@ -495,7 +661,9 @@ class OctoRest:
         return self._get(url, params=params)
 
     def printer(self, *, exclude=None, history=False, limit=None):
-        """
+        """Retrieve the current printer state
+        http://docs.octoprint.org/en/master/api/printer.html#id2
+        
         Retrieves the current state of the printer
 
         Returned information includes:
@@ -514,47 +682,11 @@ class OctoRest:
         """
         return self._hwinfo('/api/printer', exclude=exclude,
                             history=history, limit=limit)
-
-    def tool(self, history=False, limit=None):
-        """
-        Retrieves the current temperature data (actual, target and offset) plus
-        optionally a (limited) history (actual, target, timestamp) for all of
-        the printer's available tools.
-
-        It's also possible to retrieve the temperature history by setting the
-        history argument. The amount of returned history data points can be
-        limited using the limit argument.
-        """
-        return self._hwinfo('/api/printer/tool',
-                            history=history, limit=limit)
-
-    def bed(self, history=False, limit=None):
-        """
-        Retrieves the current temperature data (actual, target and offset) plus
-        optionally a (limited) history (actual, target, timestamp) for the
-        printer's heated bed.
-
-        It's also possible to retrieve the temperature history by setting the
-        history argument. The amount of returned history data points can be
-        limited using the limit argument.
-        """
-        return self._hwinfo('/api/printer/bed',
-                            history=history, limit=limit)
-
-    def home(self, axes=None):
-        """
-        Homes the print head in all of the given axes.
-        Additional parameters are:
-
-        axes: A list of axes which to home, valid values are one or more of
-        'x', 'y', 'z'. Defaults to all.
-        """
-        axes = [a.lower()[:1] for a in axes] if axes else ['x', 'y', 'z']
-        data = {'command': 'home', 'axes': axes}
-        self._post('/api/printer/printhead', json=data, ret=False)
-
+    
     def jog(self, x=None, y=None, z=None):
-        """
+        """Issue a print head command
+        http://docs.octoprint.org/en/master/api/printer.html#id3
+
         Jogs the print head (relatively) by a defined amount in one or more
         axes. Additional parameters are:
 
@@ -576,8 +708,24 @@ class OctoRest:
             data['z'] = z
         self._post('/api/printer/printhead', json=data, ret=False)
 
-    def feedrate(self, factor):
+    def home(self, axes=None):
+        """Issue a print head command
+        http://docs.octoprint.org/en/master/api/printer.html#id3
+        
+        Homes the print head in all of the given axes.
+        Additional parameters are:
+
+        axes: A list of axes which to home, valid values are one or more of
+        'x', 'y', 'z'. Defaults to all.
         """
+        axes = [a.lower()[:1] for a in axes] if axes else ['x', 'y', 'z']
+        data = {'command': 'home', 'axes': axes}
+        self._post('/api/printer/printhead', json=data, ret=False)
+
+    def feedrate(self, factor):
+        """Issue a print head command
+        http://docs.octoprint.org/en/master/api/printer.html#id3
+        
         Changes the feedrate factor to apply to the movement's of the axes.
 
         factor: The new factor, percentage as integer or float (percentage
@@ -585,7 +733,7 @@ class OctoRest:
         """
         data = {'command': 'feedrate', 'factor': factor}
         self._post('/api/printer/printhead', json=data, ret=False)
-
+    
     @classmethod
     def _tool_dict(cls, whatever):
         if isinstance(whatever, (int, float)):
@@ -597,9 +745,11 @@ class OctoRest:
             for n, thing in enumerate(whatever):
                 ret['tool{}'.format(n)] = thing
         return ret
-
+    
     def tool_target(self, targets):
-        """
+        """Issue a tool command
+        http://docs.octoprint.org/en/master/api/printer.html#id4
+
         Sets the given target temperature on the printer's tools.
         Additional parameters:
 
@@ -613,7 +763,9 @@ class OctoRest:
         self._post('/api/printer/tool', json=data, ret=False)
 
     def tool_offset(self, offsets):
-        """
+        """Issue a tool command
+        http://docs.octoprint.org/en/master/api/printer.html#id4
+        
         Sets the given temperature offset on the printer's tools.
         Additional parameters:
 
@@ -627,7 +779,9 @@ class OctoRest:
         self._post('/api/printer/tool', json=data, ret=False)
 
     def tool_select(self, tool):
-        """
+        """Issue a tool command
+        http://docs.octoprint.org/en/master/api/printer.html#id4
+        
         Selects the printer's current tool.
         Additional parameters:
 
@@ -640,7 +794,9 @@ class OctoRest:
         self._post('/api/printer/tool', json=data, ret=False)
 
     def extrude(self, amount):
-        """
+        """Issue a tool command
+        http://docs.octoprint.org/en/master/api/printer.html#id4
+        
         Extrudes the given amount of filament from the currently selected tool
 
         Additional parameters:
@@ -652,7 +808,9 @@ class OctoRest:
         self._post('/api/printer/tool', json=data, ret=False)
 
     def retract(self, amount):
-        """
+        """Issue a tool command
+        http://docs.octoprint.org/en/master/api/printer.html#id4
+        
         Retracts the given amount of filament from the currently selected tool
 
         Additional parameters:
@@ -663,7 +821,9 @@ class OctoRest:
         self.extrude(-amount)
 
     def flowrate(self, factor):
-        """
+        """Issue a tool command
+        http://docs.octoprint.org/en/master/api/printer.html#id4
+        
         Changes the flow rate factor to apply to extrusion of the tool.
 
         factor: The new factor, percentage as integer or float
@@ -672,8 +832,25 @@ class OctoRest:
         data = {'command': 'flowrate', 'factor': factor}
         self._post('/api/printer/tool', json=data, ret=False)
 
-    def bed_target(self, target):
+    def tool(self, history=False, limit=None):
+        """Retrieve the current tool state
+        http://docs.octoprint.org/en/master/api/printer.html#id5
+
+        Retrieves the current temperature data (actual, target and offset) plus
+        optionally a (limited) history (actual, target, timestamp) for all of
+        the printer's available tools.
+
+        It's also possible to retrieve the temperature history by setting the
+        history argument. The amount of returned history data points can be
+        limited using the limit argument.
         """
+        return self._hwinfo('/api/printer/tool',
+                            history=history, limit=limit)
+
+    def bed_target(self, target):
+        """Issue a bed command
+        http://docs.octoprint.org/en/master/api/printer.html#id6
+
         Sets the given target temperature on the printer's bed.
 
         target: Target temperature to set.
@@ -682,7 +859,9 @@ class OctoRest:
         self._post('/api/printer/bed', json=data, ret=False)
 
     def bed_offset(self, offset):
-        """
+        """Issue a bed command
+        http://docs.octoprint.org/en/master/api/printer.html#id6
+        
         Sets the given temperature offset on the printer's bed.
 
         offset: Temperature offset to set.
@@ -690,8 +869,62 @@ class OctoRest:
         data = {'command': 'offset', 'offset': offset}
         self._post('/api/printer/bed', json=data, ret=False)
 
-    def sd_init(self):
+    def bed(self, history=False, limit=None):
+        """Retrieve the current bed state
+        http://docs.octoprint.org/en/master/api/printer.html#id7
+
+        Retrieves the current temperature data (actual, target and offset) plus
+        optionally a (limited) history (actual, target, timestamp) for the
+        printer's heated bed.
+
+        It's also possible to retrieve the temperature history by setting the
+        history argument. The amount of returned history data points can be
+        limited using the limit argument.
         """
+        return self._hwinfo('/api/printer/bed',
+                            history=history, limit=limit)
+    
+    def chamber_target(self, target):
+        """Issue a chamber command
+        http://docs.octoprint.org/en/master/api/printer.html#id8
+
+        Sets the given target temperature on the printer's chamber.
+
+        target: Target temperature to set.
+        """
+        data = {'command': 'target', 'target': target}
+        self._post('/api/printer/chamber', json=data, ret=False)
+
+    def chamber_offset(self, offset):
+        """Issue a chamber command
+        http://docs.octoprint.org/en/master/api/printer.html#id8
+        
+        Sets the given temperature offset on the printer's chamber.
+
+        offset: Temperature offset to set.
+        """
+        data = {'command': 'offset', 'offset': offset}
+        self._post('/api/printer/chamber', json=data, ret=False)
+
+    def chamber(self, history=False, limit=None):
+        """Retrieve the current chamber state
+        http://docs.octoprint.org/en/master/api/printer.html#id9
+
+        Retrieves the current temperature data (actual, target and offset) plus
+        optionally a (limited) history (actual, target, timestamp) for the
+        printer's heated chamber.
+
+        It's also possible to retrieve the temperature history by setting the
+        history argument. The amount of returned history data points can be
+        limited using the limit argument.
+        """
+        return self._hwinfo('/api/printer/chamber',
+                            history=history, limit=limit)
+
+    def sd_init(self):
+        """Issue an SD command
+        http://docs.octoprint.org/en/master/api/printer.html#id10
+
         Initializes the printer's SD card, making it available for use.
         This also includes an initial retrieval of the list of files currently
         stored on the SD card, so after issuing files(location=sd) a retrieval
@@ -704,7 +937,9 @@ class OctoRest:
         self._post('/api/printer/sd', json=data, ret=False)
 
     def sd_refresh(self):
-        """
+        """Issue an SD command
+        http://docs.octoprint.org/en/master/api/printer.html#id10
+        
         Refreshes the list of files stored on the printer''s SD card.
         Will raise a 409 Conflict if the card has not been initialized yet
         with sd_init().
@@ -713,7 +948,9 @@ class OctoRest:
         self._post('/api/printer/sd', json=data, ret=False)
 
     def sd_release(self):
-        """
+        """Issue an SD command
+        http://docs.octoprint.org/en/master/api/printer.html#id10
+        
         Releases the SD card from the printer. The reverse operation to init.
         After issuing this command, the SD card won't be available anymore,
         hence and operations targeting files stored on it will fail.
@@ -724,7 +961,9 @@ class OctoRest:
         self._post('/api/printer/sd', json=data, ret=False)
 
     def sd(self):
-        """
+        """Retrieve the current SD state
+        http://docs.octoprint.org/en/master/api/printer.html#id11
+
         Retrieves the current state of the printer's SD card.
 
         If SD support has been disabled in OctoPrint's settings,
@@ -733,7 +972,9 @@ class OctoRest:
         return self._get('/api/printer/sd')
 
     def gcode(self, command):
-        """
+        """Send an arbitrary command to the printer
+        http://docs.octoprint.org/en/master/api/printer.html#id12
+
         Sends any command to the printer via the serial interface.
         Should be used with some care as some commands can interfere with or
         even stop a running print job.
@@ -742,15 +983,69 @@ class OctoRest:
         or a list of commands
         """
         try:
-            commands = command.split('\n')
+            n_lines = len(command.splitlines())
+            command_lst = command.splitlines()
         except AttributeError:
             # already an iterable
-            commands = list(command)
-        data = {'commands': commands}
+            command_lst = list(command)
+            n_lines = len(command_lst)
+        command_lst = list(map(lambda it: it.strip(), command_lst))
+        if n_lines == 1:
+            data = {'command': command_lst[0]}
+        else:
+            data = {'commands': command_lst}
         self._post('/api/printer/command', json=data, ret=False)
+    
+    ##################################
+    ### PRINTER PROFILE OPERATIONS ###
+    ##################################
+
+    def printer_profiles(self):
+        """Retrieve all printer profiles
+        http://docs.octoprint.org/en/master/api/printerprofiles.html#id2
+
+        Retrieves a list of all configured printer profiles.
+        """
+        return self._get('/api/printerprofiles')
+    
+    def add_printer_profile(self, profile_data):
+        """Add a new printer profile
+        http://docs.octoprint.org/en/master/api/printerprofiles.html#id3
+
+        TODO: Implement this
+        """
+        return self._post('/api/printerprofiles', json=profile_data)
+
+    def update_printer_profile(self, profile, profile_data):
+        """Update an existing printer profile
+        http://docs.octoprint.org/en/master/api/printerprofiles.html#id4
+
+        TODO: Implement this
+        """
+        return self._patch('/api/printerprofiles/{}'.format(profile), json=profile_data)
+
+    def delete_printer_profile(self, profile):
+        """Remove an existing printer profile
+        http://docs.octoprint.org/en/master/api/printerprofiles.html#id5
+
+        Deletes an existing printer profile by its profile identifier.
+
+        If the profile to be deleted is the currently selected profile, 
+        a 409 Conflict will be returned.
+        """
+        return self._delete('/api/printerprofiles/{}'.format(profile))
+    
+    ################
+    ### SETTINGS ###
+    ################
 
     def settings(self, settings=None):
-        """
+        """Retrieve current settings
+        http://docs.octoprint.org/en/master/api/settings.html#id2
+
+        Save settings
+        http://docs.octoprint.org/en/master/api/settings.html#id3
+
         Retrieves the current configuration of printer
         python dict format if argument settings is not given
 
@@ -770,8 +1065,132 @@ class OctoRest:
         else:
             return self._get('/api/settings')
     
-    def timelapse_list(self, unrendered=None):
+    def regenerate_apikey(self):
+        """Regenerate the system wide API key
+        http://docs.octoprint.org/en/master/api/settings.html#id4
         """
+        return self._post('/api/settings/apikey')
+    
+    def fetch_templates(self):
+        """Fetch template data
+        http://docs.octoprint.org/en/master/api/settings.html#id5
+
+        This API endpoint is in beta. Things might change.
+        """
+        return self._get('/api/settings/templates')
+    
+    ###############
+    ### SLICING ###
+    ###############
+
+    def slicers(self):
+        """List All Slicers and Slicing Profiles
+        http://docs.octoprint.org/en/master/api/slicing.html#id2
+
+        Returns a list of all available slicing profiles for all 
+        registered slicers in the system.
+
+        Returns a 200 OK response with a Slicer list as the body
+        upon successful completion.
+        """
+        return self._get('/api/slicing')
+    
+    def slicer_profiles(self, slicer):
+        """List Slicing Profiles of a Specific Slicer
+        http://docs.octoprint.org/en/master/api/slicing.html#id3
+
+        Returns a list of all available slicing profiles for
+        the requested slicer. Returns a 200 OK response with
+        a Profile list as the body upon successful completion.
+        """
+        return self._get('/api/slicing/{}/profiles'.format(slicer))
+    
+    def slicer_profile(self, slicer, key):
+        """Retrieve Specific Profile
+        http://docs.octoprint.org/en/master/api/slicing.html#id4
+
+        Retrieves the specified profile from the system.
+
+        Returns a 200 OK response with a full Profile as 
+        the body upon successful completion.
+        """
+        return self._get('/api/slicing/{}/profiles/{}'.format(slicer, key))
+    
+    def add_slicer_profile(self, slicer, key, profile):
+        """Add Slicing Profile
+        http://docs.octoprint.org/en/master/api/slicing.html#id5
+
+        Adds a new slicing profile for the given slicer to the system.
+        If the profile identified by key already exists, it will be overwritten.
+
+        Expects a Profile as body.
+
+        Returns a 201 Created and an abridged Profile in the body 
+        upon successful completion.
+
+        Requires admin rights.
+
+        TODO: Create a profile body to send
+        """
+        return self._put('/api/slicing/{}/profiles/{}'.format(slicer, key), json=profile)
+
+    def delete_slicer_profile(self, slicer, key):
+        """Delete Slicing Profile
+        http://docs.octoprint.org/en/master/api/slicing.html#id6
+
+        Delete the slicing profile identified by key for the slicer slicer. 
+        If the profile doesn’t exist, the request will succeed anyway.
+
+        Requires admin rights.
+        """
+        return self._delete('/api/slicing/{}/profiles/{}'.format(slicer, key))
+    
+    ##############
+    ### SYSTEM ###
+    ##############
+
+    def system_commands(self):
+        """List all registered system commands
+        http://docs.octoprint.org/en/master/api/system.html#list-all-registered-system-commands
+
+        Retrieves all configured system commands.
+        A 200 OK with a List all response will be returned.
+        """
+        return self._get('/api/system/commands')
+    
+    def source_system_commands(self, source):
+        """List all registered system commands for a source
+        http://docs.octoprint.org/en/master/api/system.html#list-all-registered-system-commands-for-a-source
+
+        Retrieves the configured system commands for the specified source.
+        The response will contain a list of command definitions.
+        """
+        return self._get('/api/system/commands/{}'.format(source))
+
+    def execute_system_command(self, source, action):
+        """Execute a registered system command
+        http://docs.octoprint.org/en/master/api/system.html#execute-a-registered-system-command
+
+        Execute the system command action defined in source.
+        Example
+        Restart OctoPrint via the core system command restart 
+        (which is available if the server restart command is configured).
+
+        Parameters:
+            source – The source for which to list commands, 
+            currently either core or custom
+            action – The identifier of the command, action from its definition
+        """
+        return self._post('/api/system/commands/{}/{}'.format(source, action))
+    
+    #################
+    ### TIMELAPSE ###
+    #################
+    
+    def timelapses(self, unrendered=None):
+        """Retrieve a list of timelapses and the current config
+        http://docs.octoprint.org/en/master/api/timelapse.html#id2
+
         Retrieve a list of timelapses and the current config.
         Returns a timelase list in the response body.
 
@@ -782,15 +1201,19 @@ class OctoRest:
         return self._get('/api/timelapse')
     
     def delete_timelapse(self, filename):
-        """
+        """Delete a timelapse
+        http://docs.octoprint.org/en/master/api/timelapse.html#id3
+
         Delete the specified timelapse
 
         Requires user rights
         """
         self._delete('/api/timelapse/{}'.format(filename))
     
-    def command_unrend_timelapse(self, name, command):
-        """
+    def render_timelapse(self, name):
+        """Issue a command for an unrendered timelapse
+        http://docs.octoprint.org/en/master/api/timelapse.html#id4
+
         Current only supports to render the unrendered timelapse 
         name via the render command.
 
@@ -803,12 +1226,22 @@ class OctoRest:
             'command': 'render',
         }
         return self._post('/api/timelapse/unrendered/{}'.format(name), json=data)
-
-    def change_timelapse_conf(self, type):
+    
+    def delete_unrendered_timelapse(self, filename):
+        """Delete an unrendered timelapse
+        http://docs.octoprint.org/en/master/api/timelapse.html#id5
         """
+        self._delete('/api/timelapse/unrendered/{}'.format(filename))
+
+    def change_timelapse_config(self, type):
+        """Change current timelapse config
+        http://docs.octoprint.org/en/master/api/timelapse.html#id6
+
         Save a new timelapse configuration to use for the next print.
         The configuration is expected as the request body.
         Requires user rights.
+
+        Type of the timelapse, either off, zchange or timed.
 
         TODO: setup timelapse configuration
         """
@@ -817,139 +1250,9 @@ class OctoRest:
         }
         return self._post('/api/timelapse', json=data)
     
-    def lst_slicers(self):
-        """
-        Returns a list of all available slicing profiles for all 
-        registered slicers in the system.
-
-        Returns a 200 OK response with a Slicer list as the body
-        upon successful completion.
-        """
-        return self._get('/api/slicing/')
-    
-    def lst_slicer_profiles(self, slicer):
-        """
-        Returns a list of all available slicing profiles for
-        the requested slicer. Returns a 200 OK response with
-        a Profile list as the body upon successful completion.
-        """
-        return self._get('/api/slicing/{}/profiles'.format(slicer))
-    
-    def get_slicer_profile(self, slicer, key):
-        """
-        Retrieves the specified profile from the system.
-
-        Returns a 200 OK response with a full Profile as 
-        the body upon successful completion.
-        """
-        return self._get('/api/slicing/{}/profiles/{}'.format(slicer, key))
-    
-    # def add_slicer_profile(self, slicer, key):
-    #     """
-    #     Adds a new slicing profile for the given slicer to the system.
-    #     If the profile identified by key already exists, it will be overwritten.
-
-    #     Expects a Profile as body.
-
-    #     Returns a 201 Created and an abridged Profile in the body 
-    #     upon successful completion.
-
-    #     Requires admin rights.
-
-    #     TODO: Create a profile body to send
-    #     TODO: Make a OctoRest _put method
-    #     """
-    #     return self._put('/api/slicing/{}/profiles/{}'.format(slicer, key))
-
-    def delete_slicer_profile(self, slicer, key):
-        """
-        Delete the slicing profile identified by key for the slicer slicer. 
-        If the profile doesn’t exist, the request will succeed anyway.
-
-        Requires admin rights.
-        """
-        return self._delete('/api/slicing/{}/profiles/{}'.format(slicer, key))
-    
-    def printer_profiles(self):
-        """
-        Retrieves a list of all configured printer profiles.
-        """
-        return self._get('/api/printerprofiles')
-    
-    # def add_printer_profile(self):
-    #     """
-    #     """
-    #     return self._post('/api/printerprofiles')
-
-    def delete_printer_profile(self, profile):
-        """
-        Deletes an existing printer profile by its profile identifier.
-
-        If the profile to be deleted is the currently selected profile, 
-        a 409 Conflict will be returned.
-        """
-        return self._delete('/api/printerprofiles/{}'.format(profile))
-    
-    def languages(self):
-        """
-        Retrieves a list of installed language packs.
-        """
-        return self._get('/api/languages')
-    
-    def upload_language(self, file):
-        """
-        Uploads a new language pack to OctoPrint.
-        Other than most of the other requests on OctoPrint’s API which are
-        expected as JSON, this request is expected as 
-        Content-Type: multipart/form-data due to the included file upload.
-        To upload a file, the request body must contain the file form field 
-        with the contents and file name of the file to upload.
-        Only files with one of the extensions zip, tar.gz, tgz or tar will 
-        be processed, for other file extensions a 400 Bad Request will be returned.
-        Will return a list of installed language packs upon completion, 
-        as described in Retrieve installed language packs.
-
-        Parameters:
-            file – The language pack file to upload
-        """
-        with self._file_tuple(file) as file_tuple:
-            files = {'file': file_tuple}
-
-            return self._post('/api/languages', files=files)
-    
-    def delete_language(self, locale, pack):
-        """
-        Retrieves a list of installed language packs.
-        """
-        return self._delete('/api/languages/{}/{}'.format(locale, pack))
-
-    def system_commands(self):
-        """
-        Retrieves all configured system commands.
-        A 200 OK with a List all response will be returned.
-        """
-        return self._get('/api/system/commands')
-    
-    def source_system_commands(self, source):
-        """
-        Retrieves the configured system commands for the specified source.
-        The response will contain a list of command definitions.
-        """
-        return self._get('/api/system/commands/{}'.format(source))
-
-    def execute_system_command(self, source, action):
-        """
-        Execute the system command action defined in source.
-        Example
-        Restart OctoPrint via the core system command restart 
-        (which is available if the server restart command is configured).
-
-        Parameters:
-            source – The source for which to list commands, 
-            currently either core or custom
-            action – The identifier of the command, action from its definition
-        """
-        return self._post('/api/system/commands/{}/{}'.format(source, action))
+    ############
+    ### USER ###
+    ############
 
     def users(self):
         """

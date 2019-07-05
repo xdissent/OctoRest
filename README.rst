@@ -10,10 +10,6 @@
 OctoRest
 ===========================
 
-.. image:: https://travis-ci.org/dougbrion/OctoRest.svg?branch=master
-    :target: https://travis-ci.org/dougbrion/OctoRest
-
-
 Python client library for OctoPrint REST API
 
 This is continued work after the great start by Miro Hrončok of covering the
@@ -111,20 +107,20 @@ A check list of the features currently implemented can be seen below.
     - |ss| Retrieve files from specific location |se|
     - |ss| Upload file or create folder |se|
     - |ss| Retrieve a specific file’s or folder’s information |se|
-    - Issue a file command
+    - |ss| Issue a file command |se|
         - |ss| Select |se|
         - |ss| Slice |se|
         - |ss| Copy |se|
         - |ss| Move |se|
     - |ss| Delete file |se|
 * Job operations
-    - Issue a job command
+    - |ss| Issue a job command |se|
         - |ss| Start |se|
         - |ss| Cancel |se|
         - |ss| Restart |se|
-        - Pause
-            - Pause
-            - Resume
+        - |ss| Pause |se|
+            - |ss| Pause |se|
+            - |ss| Resume |se|
             - |ss| Toggle |se|
     - |ss| Retrieve information about the current job |se|
 * Languages
@@ -132,8 +128,8 @@ A check list of the features currently implemented can be seen below.
     - |ss| Upload a language pack |se|
     - |ss| Delete a language pack |se|
 * Log file management
-    - Retrieve a list of available log files
-    - Delete a specific logfile
+    - |ss| Retrieve a list of available log files |se|
+    - |ss| Delete a specific logfile |se|
 * Printer operations
     - |ss| Retrieve the current printer state |se|
     - |ss| Issue a print head command |se|
@@ -151,10 +147,10 @@ A check list of the features currently implemented can be seen below.
         - |ss| Target |se|
         - |ss| Offset |se|
     - |ss| Retrieve the current bed state |se|
-    - Issue a chamber command
-        - Target
-        - Offset
-    - Retrieve the current chamber state
+    - |ss| Issue a chamber command |se|
+        - |ss| Target |se|
+        - |ss| Offset |se|
+    - |ss| Retrieve the current chamber state |se|
     - |ss| Issue an SD command |se|
         - |ss| Init |se|
         - |ss| Refresh |se|
@@ -215,4 +211,4 @@ Copyright (c) 2016-2017 `Miro Hrončok <miro@hroncok.cz/>`_. MIT License.
 
 Copyright (c) 2017 `Jiří Makarius <meadowfrey@gmail.com/>`_. MIT License.
 
-Copyright (c) 2018, `Douglas Brion <me@douglasbrion.com/>`_. MIT License.
+Copyright (c) 2018-2019, `Douglas Brion <me@douglasbrion.com/>`_. MIT License.
