@@ -1,11 +1,3 @@
-.. |ss| raw:: html
-
-   <strike>
-
-.. |se| raw:: html
-
-   </strike>
-
 ===========================
 OctoRest
 ===========================
@@ -86,123 +78,123 @@ Implemented features of OctoPrint REST API
 A check list of the features currently implemented can be seen below.
 
 * General information
-    - Authorization
-    - Login
-    - Logout
+    - [ ] Authorization
+    - [ ] Login
+    - [ ] Logout
 * Version information
-    - |ss| Version information |se|
+    - [X] Version information
 * Apps
-    - Session Keys (Deprecated since version 1.3.11: This functionality will be removed in 1.4.0.
+    - [ ] Session Keys (Deprecated since version 1.3.11: This functionality will be removed in 1.4.0.
         Use the Application Keys Plugin workflow instead.)
-        - Obtaining a temporary session key
-        - Verifying a temporary session key
+        - [ ] Obtaining a temporary session key
+        - [ ] Verifying a temporary session key
 * Connection handling
-    - |ss| Get connection settings |se|
-    - |ss| Issue a connection command |se|
-        - |ss| Connect |se|
-        - |ss| Disconnect |se|
-        - |ss| Fake_ack |se|
+    - [X] Get connection settings
+    - [X] Issue a connection command
+        - [X] Connect
+        - [X] Disconnect
+        - [X] Fake_ack
 * File operations
-    - |ss| Retrieve all files |se|
-    - |ss| Retrieve files from specific location |se|
-    - |ss| Upload file or create folder |se|
-    - |ss| Retrieve a specific file’s or folder’s information |se|
-    - |ss| Issue a file command |se|
-        - |ss| Select |se|
-        - |ss| Slice |se|
-        - |ss| Copy |se|
-        - |ss| Move |se|
-    - |ss| Delete file |se|
+    - [X] Retrieve all files
+    - [X] Retrieve files from specific location
+    - [X] Upload file or create folder
+    - [X] Retrieve a specific file’s or folder’s information
+    - [X] Issue a file command
+        - [X] Select
+        - [X] Slice
+        - [X] Copy
+        - [X] Move
+    - [X] Delete file
 * Job operations
-    - |ss| Issue a job command |se|
-        - |ss| Start |se|
-        - |ss| Cancel |se|
-        - |ss| Restart |se|
-        - |ss| Pause |se|
-            - |ss| Pause |se|
-            - |ss| Resume |se|
-            - |ss| Toggle |se|
-    - |ss| Retrieve information about the current job |se|
+    - [X] Issue a job command
+        - [X] Start
+        - [X] Cancel
+        - [X] Restart
+        - [X] Pause
+            - [X] Pause
+            - [X] Resume
+            - [X] Toggle
+    - [X] Retrieve information about the current job
 * Languages
-    - |ss| Retrieve installed language packs |se|
-    - |ss| Upload a language pack |se|
-    - |ss| Delete a language pack |se|
+    - [X] Retrieve installed language packs
+    - [X] Upload a language pack
+    - [X] Delete a language pack
 * Log file management
-    - |ss| Retrieve a list of available log files |se|
-    - |ss| Delete a specific logfile |se|
+    - [X] Retrieve a list of available log files
+    - [X] Delete a specific logfile
 * Printer operations
-    - |ss| Retrieve the current printer state |se|
-    - |ss| Issue a print head command |se|
-        - |ss| Jog |se|
-        - |ss| Home |se|
-        - |ss| Feedrate |se|
-    - |ss| Issue a tool command |se|
-        - |ss| Target |se|
-        - |ss| Offset |se|
-        - |ss| Select |se|
-        - |ss| Extrude |se|
-        - |ss| Flowrate |se|
-    - |ss| Retrieve the current tool state |se|
-    - |ss| Issue a bed command |se|
-        - |ss| Target |se|
-        - |ss| Offset |se|
-    - |ss| Retrieve the current bed state |se|
-    - |ss| Issue a chamber command |se|
-        - |ss| Target |se|
-        - |ss| Offset |se|
-    - |ss| Retrieve the current chamber state |se|
-    - |ss| Issue an SD command |se|
-        - |ss| Init |se|
-        - |ss| Refresh |se|
-        - |ss| Release |se|
-    - |ss| Retrieve the current SD state |se|
-    - |ss| Send an arbitrary command to the printer |se|
+    - [X] Retrieve the current printer state
+    - [X] Issue a print head command
+        - [X] Jog
+        - [X] Home
+        - [X] Feedrate
+    - [X] Issue a tool command
+        - [X] Target
+        - [X] Offset
+        - [X] Select
+        - [X] Extrude
+        - [X] Flowrate
+    - [X] Retrieve the current tool state
+    - [X] Issue a bed command
+        - [X] Target
+        - [X] Offset
+    - [X] Retrieve the current bed state
+    - [X] Issue a chamber command
+        - [X] Target
+        - [X] Offset
+    - [X] Retrieve the current chamber state
+    - [X] Issue an SD command
+        - [X] Init
+        - [X] Refresh
+        - [X] Release
+    - [X] Retrieve the current SD state
+    - [X] Send an arbitrary command to the printer
 * Printer profile operations
-    - |ss| Retrieve all printer profiles |se|
-    - Add a new printer profile
-    - Update an existing printer profile
-    - |ss| Remove an existing printer profile |se|
+    - [X] Retrieve all printer profiles
+    - [ ] Add a new printer profile
+    - [ ] Update an existing printer profile
+    - [X] Remove an existing printer profile
 * Settings
-    - |ss| Retrieve current settings |se|
-    - |ss| Save settings |se|
-    - Regenerate the system wide API key
-    - Fetch template data (in beta)
+    - [X] Retrieve current settings
+    - [X] Save settings
+    - [ ] Regenerate the system wide API key
+    - [ ] Fetch template data (in beta)
 * Slicing
-    - |ss| List All Slicers and Slicing Profiles |se|
-    - |ss| List Slicing Profiles of a Specific Slicer |se|
-    - |ss| Retrieve Specific Profile |se|
-    - Add Slicing Profile
-    - |ss| Delete Slicing Profile |se|
+    - [X] List All Slicers and Slicing Profiles
+    - [X] List Slicing Profiles of a Specific Slicer
+    - [X] Retrieve Specific Profile
+    - [ ] Add Slicing Profile
+    - [X] Delete Slicing Profile
 * System
-    - |ss| List all registered system commands |se|
-    - |ss| List all registered system commands for a source |se|
-    - |ss| Execute a registered system command |se|
+    - [X] List all registered system commands
+    - [X] List all registered system commands for a source
+    - [X] Execute a registered system command
 * Timelapse
-    - |ss| Retrieve a list of timelapses and the current config |se|
-    - |ss| Delete a timelapse |se|
-    - |ss| Issue a command for an unrendered timelapse |se|
-        - |ss| Render |se|
-    - |ss| Delete an unrendered timelapse |se|
-    - |ss| Change current timelapse config |se|
+    - [X] Retrieve a list of timelapses and the current config
+    - [X] Delete a timelapse
+    - [X] Issue a command for an unrendered timelapse
+        - [X] Render
+    - [X] Delete an unrendered timelapse
+    - [X] Change current timelapse config
 * User
-    - |ss| Retrieve a list of users |se|
-    - |ss| Retrieve a user |se|
-    - |ss| Add a user |se|
-    - |ss| Update a user |se|
-    - |ss| Delete a user |se|
-    - |ss| Reset a user’s password |se|
-    - |ss| Retrieve a user’s settings |se|
-    - Update a user’s settings
-    - |ss| Regenerate a user’s personal API key |se|
-    - |ss| Delete a user’s personal API key |se|
+    - [X] Retrieve a list of users
+    - [X] Retrieve a user
+    - [X] Add a user
+    - [X] Update a user
+    - [X] Delete a user
+    - [X] Reset a user’s password
+    - [X] Retrieve a user’s settings
+    - [ ] Update a user’s settings
+    - [X] Regenerate a user’s personal API key
+    - [X] Delete a user’s personal API key
 * Util
-    - |ss| Test paths or URLs |se|
-        - |ss| Path |se|
-        - |ss| URL |se|
-        - |ss| Server |se|
+    - [X] Test paths or URLs
+        - [X] Path
+        - [X] URL
+        - [X] Server
 * Wizard
-    - |ss| Retrieve additional data about registered wizards |se|
-    - |ss| Finish wizards |se|
+    - [X] Retrieve additional data about registered wizards
+    - [X] Finish wizards
 
 Copyright & License
 -------------------
