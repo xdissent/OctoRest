@@ -13,8 +13,8 @@ OctoRest
 Python client library for OctoPrint REST API
 
 This is continued work after the great start by Miro Hrončok of covering the
-OctoPrint REST API. Nearly all current functionality in the API has been covered,
-but as of yet I have not had time to add extensive testing. (Will do...)
+OctoPrint REST API. Nearly all current functionality in the API has been covered (up to OctoPrint 1.3.11),
+but as of yet I have not had time to add extensive testing for all aspects of the API.
 
 Installation
 ------------
@@ -75,7 +75,7 @@ Maybe you want to stop your print and then subsequently home the printer. This i
         Args:
             client - the OctoRest client 
         """
-        print("Toggling the print!")
+        print("Pausing the print!")
         client.pause()
         print("Homing your 3d printer...")
         client.home()
