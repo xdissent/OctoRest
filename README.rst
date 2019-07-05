@@ -196,10 +196,10 @@ A check list of the features currently implemented can be seen below.
     - |ss| Regenerate a user’s personal API key |se|
     - |ss| Delete a user’s personal API key |se|
 * Util
-    - Test paths or URLs
-        - Path
-        - URL
-        - Server
+    - |ss| Test paths or URLs |se|
+        - |ss| Path |se|
+        - |ss| URL |se|
+        - |ss| Server |se|
 * Wizard
     - |ss| Retrieve additional data about registered wizards |se|
     - |ss| Finish wizards |se|

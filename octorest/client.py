@@ -140,8 +140,7 @@ class OctoRest:
         return tuple(map(int, (v.split("."))))
 
     def get_version(self):
-        """
-        Version information
+        """Version information
         http://docs.octoprint.org/en/master/api/version.html#version-information
 
         Retrieve information regarding server and API version
@@ -153,8 +152,7 @@ class OctoRest:
     ###########################
 
     def tmp_session_key(self):
-        """
-        Obtaining a temporary session key
+        """Obtaining a temporary session key
         http://docs.octoprint.org/en/master/api/apps.html#obtaining-a-temporary-session-key
 
         Retrieve a temporary session key with a minimum validity. 
@@ -167,9 +165,8 @@ class OctoRest:
         return self._get('/apps/auth')
 
     def verify_tmp_session_key(self):
-        """
-        Verifying a temporary session key
-        http://docs.octoprint.org/en/master/api/apps.html#id5
+        """Verifying a temporary session key
+        http://docs.octoprint.org/en/master/api/apps.html#verifying-a-temporary-session-key
 
         Verify a formerly retrieved temporary session key by providing 
         credentials and a cryptographic signature over these credentials
@@ -186,9 +183,8 @@ class OctoRest:
     ###########################
 
     def connection_info(self):
-        """
-        Get connection settings
-        http://docs.octoprint.org/en/master/api/connection.html#id2
+        """Get connection settings
+        http://docs.octoprint.org/en/master/api/connection.html#get-connection-settings
 
         Retrieve the current connection settings, including information
         regarding the available baudrates and serial ports and the
@@ -204,10 +200,9 @@ class OctoRest:
 
     def connect(self, *, port=None, baudrate=None,
                 printer_profile=None, save=None, autoconnect=None):
-        """
-        Issue a connection command
-        http://docs.octoprint.org/en/master/api/connection.html#id3
-
+        """Issue a connection command
+        http://docs.octoprint.org/en/master/api/connection.html#issue-a-connection-command
+        
         Instructs OctoPrint to connect to the printer
 
         port: Optional, specific port to connect to. If not set the current
@@ -243,19 +238,17 @@ class OctoRest:
         self._post('/api/connection', json=data, ret=False)
 
     def disconnect(self):
-        """
-        Issue a connection command
-        http://docs.octoprint.org/en/master/api/connection.html#id3
-
+        """Issue a connection command
+        http://docs.octoprint.org/en/master/api/connection.html#issue-a-connection-command
+        
         Instructs OctoPrint to disconnect from the printer
         """
         data = {'command': 'disconnect'}
         self._post('/api/connection', json=data, ret=False)
 
     def fake_ack(self):
-        """
-        Issue a connection command
-        http://docs.octoprint.org/en/master/api/connection.html#id3
+        """Issue a connection command
+        http://docs.octoprint.org/en/master/api/connection.html#issue-a-connection-command
 
         Fakes an acknowledgment message for OctoPrint in case one got lost on
         the serial line and the communication with the printer since stalled.
@@ -277,10 +270,10 @@ class OctoRest:
 
     def files(self, location=None, recursive=False):
         """Retrieve all files
-        http://docs.octoprint.org/en/master/api/files.html#id2
+        http://docs.octoprint.org/en/master/api/files.html#retrieve-all-files
 
         Retrieve files from specific location 
-        http://docs.octoprint.org/en/master/api/files.html#id3
+        http://docs.octoprint.org/en/master/api/files.html#retrieve-files-from-specific-location
 
         Retrieve information regarding all files currently available and
         regarding the disk space still available locally in the system
@@ -332,7 +325,7 @@ class OctoRest:
     
     def files_info(self, location, filename, recursive=False):
         """Retrieve a specific file’s or folder’s information
-        http://docs.octoprint.org/en/master/api/files.html#id5
+        http://docs.octoprint.org/en/master/api/files.html#retrieve-a-specific-file-s-or-folder-s-information
 
         Retrieves the selected file’s or folder’s information.
         If the file is unknown, a 404 Not Found is returned.
@@ -349,7 +342,7 @@ class OctoRest:
     def upload(self, file, *, location='local',
                select=False, print=False, userdata=None, path=None):
         """Upload file or create folder
-        http://docs.octoprint.org/en/master/api/files.html#id4
+        http://docs.octoprint.org/en/master/api/files.html#upload-file-or-create-folder
 
         Upload a given file
         It can be a path or a tuple with a filename and a file-like object
@@ -366,11 +359,11 @@ class OctoRest:
                 data['path'] = path
 
             return self._post('/api/files/{}'.format(location),
-                              files=files, data=data)
+                              files=files, json=data)
 
     def new_folder(self, folder_name, location='local'):
         """Upload file or create folder
-        http://docs.octoprint.org/en/master/api/files.html#id4
+        http://docs.octoprint.org/en/master/api/files.html#upload-file-or-create-folder
 
         To create a new folder, the request body must at least contain the foldername
         form field, specifying the name of the new folder. Note that folder creation
@@ -379,11 +372,11 @@ class OctoRest:
         data = {
             'foldername': folder_name,
         }
-        return self._post('/api/files/{}'.format(location), data=data)
+        return self._post('/api/files/{}'.format(location), json=data)
 
     def select(self, location, *, print=False):
         """Issue a file command
-        http://docs.octoprint.org/en/master/api/files.html#id6
+        http://docs.octoprint.org/en/master/api/files.html#issue-a-file-command
 
         Selects a file for printing
 
@@ -400,7 +393,7 @@ class OctoRest:
     def slice(self, location, slicer='curalegacy', gcode=None, position=None, printer_profile=None, 
               profile=None, select=False, print=False):
         """Issue a file command
-        http://docs.octoprint.org/en/master/api/files.html#id6
+        http://docs.octoprint.org/en/master/api/files.html#issue-a-file-command
 
         Slices an STL file into GCODE. 
         Note that this is an asynchronous operation that 
@@ -428,7 +421,7 @@ class OctoRest:
     
     def copy(self, location, dest):
         """Issue a file command
-        http://docs.octoprint.org/en/master/api/files.html#id6
+        http://docs.octoprint.org/en/master/api/files.html#issue-a-file-command
 
         Copies the file or folder to a new destination on the same location
         """
@@ -441,7 +434,7 @@ class OctoRest:
     
     def move(self, location, dest):
         """Issue a file command
-        http://docs.octoprint.org/en/master/api/files.html#id6
+        http://docs.octoprint.org/en/master/api/files.html#issue-a-file-command
         
         Moves the file or folder to a new destination on the same location
         """
@@ -469,7 +462,7 @@ class OctoRest:
 
     def start(self):
         """Issue a job command
-        http://docs.octoprint.org/en/master/api/job.html#id2
+        http://docs.octoprint.org/en/master/api/job.html#issue-a-job-command
 
         Starts the print of the currently selected file
 
@@ -480,7 +473,7 @@ class OctoRest:
     
     def cancel(self):
         """Issue a job command
-        http://docs.octoprint.org/en/master/api/job.html#id2
+        http://docs.octoprint.org/en/master/api/job.html#issue-a-job-command
 
         Cancels the current print job
 
@@ -491,7 +484,7 @@ class OctoRest:
     
     def restart(self):
         """Issue a job command
-        http://docs.octoprint.org/en/master/api/job.html#id2
+        http://docs.octoprint.org/en/master/api/job.html#issue-a-job-command
 
         Restart the print of the currently selected file from the beginning
 
@@ -503,7 +496,7 @@ class OctoRest:
 
     def pause_command(self, action):
         """Issue a job command
-        http://docs.octoprint.org/en/master/api/job.html#id2
+        http://docs.octoprint.org/en/master/api/job.html#issue-a-job-command
         
         Pauses/resumes/toggles the current print job.
         Accepts one optional additional parameter action specifying
@@ -532,7 +525,7 @@ class OctoRest:
     
     def pause(self):
         """Issue a job command
-        http://docs.octoprint.org/en/master/api/job.html#id2
+        http://docs.octoprint.org/en/master/api/job.html#issue-a-job-command
 
         Pauses the current job if it’s printing,
         does nothing if it’s already paused.
@@ -541,7 +534,7 @@ class OctoRest:
 
     def resume(self):
         """Issue a job command
-        http://docs.octoprint.org/en/master/api/job.html#id2
+        http://docs.octoprint.org/en/master/api/job.html#issue-a-job-command
 
         Resumes the current job if it’s paused,
         does nothing if it’s printing.
@@ -550,8 +543,8 @@ class OctoRest:
     
     def toggle(self):
         """Issue a job command
-        http://docs.octoprint.org/en/master/api/job.html#id2
-
+        http://docs.octoprint.org/en/master/api/job.html#issue-a-job-command
+        
         Toggles the pause state of the job,
         pausing it if it’s printing and resuming it
         if it’s currently paused.
@@ -560,7 +553,7 @@ class OctoRest:
     
     def job_info(self):
         """Retrieve information about the current job
-        http://docs.octoprint.org/en/master/api/job.html#id3
+        http://docs.octoprint.org/en/master/api/job.html#retrieve-information-about-the-current-job
 
         Retrieve information about the current job (if there is one)
         """
@@ -572,7 +565,7 @@ class OctoRest:
 
     def languages(self):
         """Retrieve installed language packs
-        http://docs.octoprint.org/en/master/api/languages.html#id2
+        http://docs.octoprint.org/en/master/api/languages.html#retrieve-installed-language-packs
 
         Retrieves a list of installed language packs.
         """
@@ -580,7 +573,7 @@ class OctoRest:
     
     def upload_language(self, file):
         """Upload a language pack
-        http://docs.octoprint.org/en/master/api/languages.html#id3
+        http://docs.octoprint.org/en/master/api/languages.html#upload-a-language-pack
 
         Uploads a new language pack to OctoPrint.
         Other than most of the other requests on OctoPrint’s API which are
@@ -603,7 +596,7 @@ class OctoRest:
     
     def delete_language(self, locale, pack):
         """Delete a language pack
-        http://docs.octoprint.org/en/master/api/languages.html#id4
+        http://docs.octoprint.org/en/master/api/languages.html#delete-a-language-pack
 
         Retrieves a list of installed language packs.
         """
@@ -662,7 +655,7 @@ class OctoRest:
 
     def printer(self, *, exclude=None, history=False, limit=None):
         """Retrieve the current printer state
-        http://docs.octoprint.org/en/master/api/printer.html#id2
+        http://docs.octoprint.org/en/master/api/printer.html#retrieve-the-current-printer-state
         
         Retrieves the current state of the printer
 
@@ -685,7 +678,7 @@ class OctoRest:
     
     def jog(self, x=None, y=None, z=None):
         """Issue a print head command
-        http://docs.octoprint.org/en/master/api/printer.html#id3
+        http://docs.octoprint.org/en/master/api/printer.html#issue-a-print-head-command
 
         Jogs the print head (relatively) by a defined amount in one or more
         axes. Additional parameters are:
@@ -710,7 +703,7 @@ class OctoRest:
 
     def home(self, axes=None):
         """Issue a print head command
-        http://docs.octoprint.org/en/master/api/printer.html#id3
+        http://docs.octoprint.org/en/master/api/printer.html#issue-a-print-head-command
         
         Homes the print head in all of the given axes.
         Additional parameters are:
@@ -724,7 +717,7 @@ class OctoRest:
 
     def feedrate(self, factor):
         """Issue a print head command
-        http://docs.octoprint.org/en/master/api/printer.html#id3
+        http://docs.octoprint.org/en/master/api/printer.html#issue-a-print-head-command
         
         Changes the feedrate factor to apply to the movement's of the axes.
 
@@ -748,7 +741,7 @@ class OctoRest:
     
     def tool_target(self, targets):
         """Issue a tool command
-        http://docs.octoprint.org/en/master/api/printer.html#id4
+        http://docs.octoprint.org/en/master/api/printer.html#issue-a-tool-command
 
         Sets the given target temperature on the printer's tools.
         Additional parameters:
@@ -764,7 +757,7 @@ class OctoRest:
 
     def tool_offset(self, offsets):
         """Issue a tool command
-        http://docs.octoprint.org/en/master/api/printer.html#id4
+        http://docs.octoprint.org/en/master/api/printer.html#issue-a-tool-command
         
         Sets the given temperature offset on the printer's tools.
         Additional parameters:
@@ -780,7 +773,7 @@ class OctoRest:
 
     def tool_select(self, tool):
         """Issue a tool command
-        http://docs.octoprint.org/en/master/api/printer.html#id4
+        http://docs.octoprint.org/en/master/api/printer.html#issue-a-tool-command
         
         Selects the printer's current tool.
         Additional parameters:
@@ -795,7 +788,7 @@ class OctoRest:
 
     def extrude(self, amount):
         """Issue a tool command
-        http://docs.octoprint.org/en/master/api/printer.html#id4
+        http://docs.octoprint.org/en/master/api/printer.html#issue-a-tool-command
         
         Extrudes the given amount of filament from the currently selected tool
 
@@ -809,7 +802,7 @@ class OctoRest:
 
     def retract(self, amount):
         """Issue a tool command
-        http://docs.octoprint.org/en/master/api/printer.html#id4
+        http://docs.octoprint.org/en/master/api/printer.html#issue-a-tool-command
         
         Retracts the given amount of filament from the currently selected tool
 
@@ -822,7 +815,7 @@ class OctoRest:
 
     def flowrate(self, factor):
         """Issue a tool command
-        http://docs.octoprint.org/en/master/api/printer.html#id4
+        http://docs.octoprint.org/en/master/api/printer.html#issue-a-tool-command
         
         Changes the flow rate factor to apply to extrusion of the tool.
 
@@ -834,7 +827,7 @@ class OctoRest:
 
     def tool(self, history=False, limit=None):
         """Retrieve the current tool state
-        http://docs.octoprint.org/en/master/api/printer.html#id5
+        http://docs.octoprint.org/en/master/api/printer.html#retrieve-the-current-tool-state
 
         Retrieves the current temperature data (actual, target and offset) plus
         optionally a (limited) history (actual, target, timestamp) for all of
@@ -849,7 +842,7 @@ class OctoRest:
 
     def bed_target(self, target):
         """Issue a bed command
-        http://docs.octoprint.org/en/master/api/printer.html#id6
+        http://docs.octoprint.org/en/master/api/printer.html#issue-a-bed-command
 
         Sets the given target temperature on the printer's bed.
 
@@ -860,7 +853,7 @@ class OctoRest:
 
     def bed_offset(self, offset):
         """Issue a bed command
-        http://docs.octoprint.org/en/master/api/printer.html#id6
+        http://docs.octoprint.org/en/master/api/printer.html#issue-a-bed-command
         
         Sets the given temperature offset on the printer's bed.
 
@@ -871,7 +864,7 @@ class OctoRest:
 
     def bed(self, history=False, limit=None):
         """Retrieve the current bed state
-        http://docs.octoprint.org/en/master/api/printer.html#id7
+        http://docs.octoprint.org/en/master/api/printer.html#retrieve-the-current-bed-state
 
         Retrieves the current temperature data (actual, target and offset) plus
         optionally a (limited) history (actual, target, timestamp) for the
@@ -886,7 +879,7 @@ class OctoRest:
     
     def chamber_target(self, target):
         """Issue a chamber command
-        http://docs.octoprint.org/en/master/api/printer.html#id8
+        http://docs.octoprint.org/en/master/api/printer.html#issue-a-chamber-command
 
         Sets the given target temperature on the printer's chamber.
 
@@ -897,7 +890,7 @@ class OctoRest:
 
     def chamber_offset(self, offset):
         """Issue a chamber command
-        http://docs.octoprint.org/en/master/api/printer.html#id8
+        http://docs.octoprint.org/en/master/api/printer.html#issue-a-chamber-command
         
         Sets the given temperature offset on the printer's chamber.
 
@@ -908,7 +901,7 @@ class OctoRest:
 
     def chamber(self, history=False, limit=None):
         """Retrieve the current chamber state
-        http://docs.octoprint.org/en/master/api/printer.html#id9
+        http://docs.octoprint.org/en/master/api/printer.html#retrieve-the-current-chamber-state
 
         Retrieves the current temperature data (actual, target and offset) plus
         optionally a (limited) history (actual, target, timestamp) for the
@@ -923,7 +916,7 @@ class OctoRest:
 
     def sd_init(self):
         """Issue an SD command
-        http://docs.octoprint.org/en/master/api/printer.html#id10
+        http://docs.octoprint.org/en/master/api/printer.html#issue-an-sd-command
 
         Initializes the printer's SD card, making it available for use.
         This also includes an initial retrieval of the list of files currently
@@ -938,7 +931,7 @@ class OctoRest:
 
     def sd_refresh(self):
         """Issue an SD command
-        http://docs.octoprint.org/en/master/api/printer.html#id10
+        http://docs.octoprint.org/en/master/api/printer.html#issue-an-sd-command
         
         Refreshes the list of files stored on the printer''s SD card.
         Will raise a 409 Conflict if the card has not been initialized yet
@@ -949,7 +942,7 @@ class OctoRest:
 
     def sd_release(self):
         """Issue an SD command
-        http://docs.octoprint.org/en/master/api/printer.html#id10
+        http://docs.octoprint.org/en/master/api/printer.html#issue-an-sd-command
         
         Releases the SD card from the printer. The reverse operation to init.
         After issuing this command, the SD card won't be available anymore,
@@ -962,7 +955,7 @@ class OctoRest:
 
     def sd(self):
         """Retrieve the current SD state
-        http://docs.octoprint.org/en/master/api/printer.html#id11
+        http://docs.octoprint.org/en/master/api/printer.html#retrieve-the-current-sd-state
 
         Retrieves the current state of the printer's SD card.
 
@@ -973,7 +966,7 @@ class OctoRest:
 
     def gcode(self, command):
         """Send an arbitrary command to the printer
-        http://docs.octoprint.org/en/master/api/printer.html#id12
+        http://docs.octoprint.org/en/master/api/printer.html#send-an-arbitrary-command-to-the-printer
 
         Sends any command to the printer via the serial interface.
         Should be used with some care as some commands can interfere with or
@@ -1002,7 +995,7 @@ class OctoRest:
 
     def printer_profiles(self):
         """Retrieve all printer profiles
-        http://docs.octoprint.org/en/master/api/printerprofiles.html#id2
+        http://docs.octoprint.org/en/master/api/printerprofiles.html#retrieve-all-printer-profiles
 
         Retrieves a list of all configured printer profiles.
         """
@@ -1010,7 +1003,7 @@ class OctoRest:
     
     def add_printer_profile(self, profile_data):
         """Add a new printer profile
-        http://docs.octoprint.org/en/master/api/printerprofiles.html#id3
+        http://docs.octoprint.org/en/master/api/printerprofiles.html#add-a-new-printer-profile
 
         TODO: Implement this
         """
@@ -1018,7 +1011,7 @@ class OctoRest:
 
     def update_printer_profile(self, profile, profile_data):
         """Update an existing printer profile
-        http://docs.octoprint.org/en/master/api/printerprofiles.html#id4
+        http://docs.octoprint.org/en/master/api/printerprofiles.html#update-an-existing-printer-profile
 
         TODO: Implement this
         """
@@ -1026,7 +1019,7 @@ class OctoRest:
 
     def delete_printer_profile(self, profile):
         """Remove an existing printer profile
-        http://docs.octoprint.org/en/master/api/printerprofiles.html#id5
+        http://docs.octoprint.org/en/master/api/printerprofiles.html#remove-an-existing-printer-profile
 
         Deletes an existing printer profile by its profile identifier.
 
@@ -1041,10 +1034,10 @@ class OctoRest:
 
     def settings(self, settings=None):
         """Retrieve current settings
-        http://docs.octoprint.org/en/master/api/settings.html#id2
+        http://docs.octoprint.org/en/master/api/settings.html#retrieve-current-settings
 
         Save settings
-        http://docs.octoprint.org/en/master/api/settings.html#id3
+        http://docs.octoprint.org/en/master/api/settings.html#save-settings
 
         Retrieves the current configuration of printer
         python dict format if argument settings is not given
@@ -1067,13 +1060,13 @@ class OctoRest:
     
     def regenerate_apikey(self):
         """Regenerate the system wide API key
-        http://docs.octoprint.org/en/master/api/settings.html#id4
+        http://docs.octoprint.org/en/master/api/settings.html#regenerate-the-system-wide-api-key
         """
         return self._post('/api/settings/apikey')
     
     def fetch_templates(self):
         """Fetch template data
-        http://docs.octoprint.org/en/master/api/settings.html#id5
+        http://docs.octoprint.org/en/master/api/settings.html#fetch-template-data
 
         This API endpoint is in beta. Things might change.
         """
@@ -1085,7 +1078,7 @@ class OctoRest:
 
     def slicers(self):
         """List All Slicers and Slicing Profiles
-        http://docs.octoprint.org/en/master/api/slicing.html#id2
+        http://docs.octoprint.org/en/master/api/slicing.html#list-all-slicers-and-slicing-profiles
 
         Returns a list of all available slicing profiles for all 
         registered slicers in the system.
@@ -1097,7 +1090,7 @@ class OctoRest:
     
     def slicer_profiles(self, slicer):
         """List Slicing Profiles of a Specific Slicer
-        http://docs.octoprint.org/en/master/api/slicing.html#id3
+        http://docs.octoprint.org/en/master/api/slicing.html#list-slicing-profiles-of-a-specific-slicer
 
         Returns a list of all available slicing profiles for
         the requested slicer. Returns a 200 OK response with
@@ -1107,7 +1100,7 @@ class OctoRest:
     
     def slicer_profile(self, slicer, key):
         """Retrieve Specific Profile
-        http://docs.octoprint.org/en/master/api/slicing.html#id4
+        http://docs.octoprint.org/en/master/api/slicing.html#retrieve-specific-profile
 
         Retrieves the specified profile from the system.
 
@@ -1118,7 +1111,7 @@ class OctoRest:
     
     def add_slicer_profile(self, slicer, key, profile):
         """Add Slicing Profile
-        http://docs.octoprint.org/en/master/api/slicing.html#id5
+        http://docs.octoprint.org/en/master/api/slicing.html#add-slicing-profile
 
         Adds a new slicing profile for the given slicer to the system.
         If the profile identified by key already exists, it will be overwritten.
@@ -1136,8 +1129,8 @@ class OctoRest:
 
     def delete_slicer_profile(self, slicer, key):
         """Delete Slicing Profile
-        http://docs.octoprint.org/en/master/api/slicing.html#id6
-
+        http://docs.octoprint.org/en/master/api/slicing.html#delete-slicing-profile
+        
         Delete the slicing profile identified by key for the slicer slicer. 
         If the profile doesn’t exist, the request will succeed anyway.
 
@@ -1189,7 +1182,7 @@ class OctoRest:
     
     def timelapses(self, unrendered=None):
         """Retrieve a list of timelapses and the current config
-        http://docs.octoprint.org/en/master/api/timelapse.html#id2
+        http://docs.octoprint.org/en/master/api/timelapse.html#retrieve-a-list-of-timelapses-and-the-current-config
 
         Retrieve a list of timelapses and the current config.
         Returns a timelase list in the response body.
@@ -1202,7 +1195,7 @@ class OctoRest:
     
     def delete_timelapse(self, filename):
         """Delete a timelapse
-        http://docs.octoprint.org/en/master/api/timelapse.html#id3
+        http://docs.octoprint.org/en/master/api/timelapse.html#delete-a-timelapse
 
         Delete the specified timelapse
 
@@ -1212,7 +1205,7 @@ class OctoRest:
     
     def render_timelapse(self, name):
         """Issue a command for an unrendered timelapse
-        http://docs.octoprint.org/en/master/api/timelapse.html#id4
+        http://docs.octoprint.org/en/master/api/timelapse.html#issue-a-command-for-an-unrendered-timelapse
 
         Current only supports to render the unrendered timelapse 
         name via the render command.
@@ -1229,13 +1222,13 @@ class OctoRest:
     
     def delete_unrendered_timelapse(self, filename):
         """Delete an unrendered timelapse
-        http://docs.octoprint.org/en/master/api/timelapse.html#id5
+        http://docs.octoprint.org/en/master/api/timelapse.html#delete-an-unrendered-timelapse
         """
         self._delete('/api/timelapse/unrendered/{}'.format(filename))
 
     def change_timelapse_config(self, type):
         """Change current timelapse config
-        http://docs.octoprint.org/en/master/api/timelapse.html#id6
+        http://docs.octoprint.org/en/master/api/timelapse.html#change-current-timelapse-config
 
         Save a new timelapse configuration to use for the next print.
         The configuration is expected as the request body.
@@ -1255,7 +1248,9 @@ class OctoRest:
     ############
 
     def users(self):
-        """
+        """Retrieve a list of users
+        http://docs.octoprint.org/en/master/api/users.html#retrieve-a-list-of-users
+
         Retrieves a list of all registered users in OctoPrint.
         Will return a 200 OK with a user list response as body.
         Requires admin rights.
@@ -1263,7 +1258,9 @@ class OctoRest:
         return self._get('/api/users')
     
     def user(self, username):
-        """
+        """Retrieve a user
+        http://docs.octoprint.org/en/master/api/users.html#retrieve-a-user
+
         Retrieves information about a user.
         Will return a 200 OK with a user record as body.
         Requires either admin rights or to be logged in as the user.
@@ -1274,7 +1271,9 @@ class OctoRest:
         return self._get('/api/users/{}'.format(username))
     
     def add_user(self, name, password, active=False, admin=False):
-        """
+        """Add a user
+        http://docs.octoprint.org/en/master/api/users.html#add-a-user
+
         Adds a user to OctoPrint.
         Expects a user registration request as request body.
         Returns a list of registered users on success, see Retrieve a list of users.
@@ -1289,13 +1288,15 @@ class OctoRest:
         data = {
             'name': name,
             'password': password,
-            'active': active,
-            'admin': admin,
+            'active': str(active).lower(),
+            'admin': str(admin).lower(),
         }
         return self._post('/api/users', json=data)
     
     def update_user(self, username, admin=None, active=None):
-        """
+        """Update a user
+        http://docs.octoprint.org/en/master/api/users.html#update-a-user
+
         Updates a user record.
         Expects a user update request as request body.
         Returns a list of registered users on success, see Retrieve a list of users.
@@ -1308,25 +1309,17 @@ class OctoRest:
             admin – Whether to mark the user as admin (true) or not (false), can be left out (no change)
             active – Whether to mark the account as activated (true) or deactivated (false), can be left out (no change)
         """
-        if admin == None and active == None:
-            return self._put('/api/users/{}'.format(username))
-        if not admin == None:
-            data = {
-                'admin': admin,
-            }
-        if not active == None:
-            data = {
-                'active': active,
-            }
-        if not active == None and not admin == None:
-            data = {
-                'active': active,
-                'admin': admin,
-            }
+        data = {}
+        if admin:
+            data['admin'] = str(admin).lower()
+        if active:
+            data['active'] = str(active).lower()
         return self._put('/api/users/{}'.format(username), json=data)
     
     def delete_user(self, username):
-        """
+        """Delete a user
+        http://docs.octoprint.org/en/master/api/users.html#delete-a-user
+
         Delete a user record.
         Returns a list of registered users on success, see Retrieve a list of users.
         Requires admin rights.
@@ -1336,8 +1329,10 @@ class OctoRest:
         """
         return self._delete('/api/users/{}'.format(username))
     
-    def rst_user_password(self, username, password):
-        """
+    def reset_user_password(self, username, password):
+        """Reset a user’s password
+        http://docs.octoprint.org/en/master/api/users.html#reset-a-user-s-password
+
         Changes the password of a user.
         Expects a JSON object with a single property password as request body.
         Requires admin rights or to be logged in as the user.
@@ -1354,7 +1349,9 @@ class OctoRest:
         return self._put('/api/users/{}/password'.format(username), json=data)
 
     def user_settings(self, username):
-        """
+        """Retrieve a user’s settings
+        http://docs.octoprint.org/en/master/api/users.html#retrieve-a-user-s-settings
+
         Retrieves a user’s settings.
         Will return a 200 OK with a JSON object representing the user’s 
         personal settings (if any) as body.
@@ -1365,8 +1362,16 @@ class OctoRest:
         """
         return self._get('/api/users/{}/settings'.format(username))
     
-    def regen_user_apikey(self, username):
+    def update_user_settings(self, username, new_settings):
+        """Update a user’s settings
+        http://docs.octoprint.org/en/master/api/users.html#update-a-user-s-settings
         """
+        return self._patch('/api/users/{}/settings'.format(username), json=new_settings)
+    
+    def regenerate_user_apikey(self, username):
+        """Regenerate a user’s personal API key
+        http://docs.octoprint.org/en/master/api/users.html#regenerate-a-user-s-personal-api-key
+
         Generates a new API key for the user.
         Does not expect a body. Will return the generated API key as apikey 
         property in the JSON object contained in the response body.
@@ -1378,7 +1383,9 @@ class OctoRest:
         return self._post('/api/users/{}/apikey'.format(username))
     
     def delete_user_apikey(self, username):
-        """
+        """Delete a user’s personal API key
+        http://docs.octoprint.org/en/master/api/users.html#delete-a-user-s-personal-api-key
+        
         Deletes a user’s personal API key.
         Requires admin rights or to be logged in as the user.
 
@@ -1387,8 +1394,64 @@ class OctoRest:
         """
         return self._delete('/api/users/{}/apikey'.format(username))
     
+    ############
+    ### UTIL ###
+    ############
+
+    def util_test_path(self, path, check_type, check_access,
+                       allow_create_dir=False, check_writable_dir=False):
+        """Test paths or URLs
+        http://docs.octoprint.org/en/master/api/util.html#test-paths-or-urls
+
+        check_type: either 'file' or 'dir'
+        """
+        data = {
+            'command': 'path',
+            'path': path,
+            'check_type': check_type,
+            'check_access': check_access,
+        }
+        if check_type == 'dir':
+            data['allow_create_dir'] = str(allow_create_dir).lower()
+            data['check_writable_dir'] = str(check_writable_dir).lower()
+        return self._post('/api/util/test', json=data)
+    
+    def util_test_url(self, url, status, method, response, timeout=120):
+        """Test paths or URLs
+        http://docs.octoprint.org/en/master/api/util.html#test-paths-or-urls
+        """
+        data = {
+            'command': 'url',
+            'url': url,
+            'status': status,
+            'method': method,
+            'response': response,
+            'timeout': timeout
+        }
+        return self._post('/api/util/test', json=data)
+    
+    def util_test_server(self, host, port, protocol, timeout=None):
+        """Test paths or URLs
+        http://docs.octoprint.org/en/master/api/util.html#test-paths-or-urls
+        """
+        data = {
+            'command': 'server',
+            'host': host,
+            'port': port,
+            'protocol': protocol,
+        }
+        if timeout:
+            data['timeout'] = timeout
+        return self._post('/api/util/test', json=data)
+
+    ##############
+    ### WIZARD ###
+    ##############
+    
     def wizard(self):
-        """    
+        """Retrieve additional data about registered wizards
+        http://docs.octoprint.org/en/master/api/wizard.html#retrieve-additional-data-about-registered-wizards
+
         Retrieves additional data about the registered wizards.
 
         Returns a 200 OK with an object mapping wizard identifiers to wizard 
@@ -1396,8 +1459,10 @@ class OctoRest:
         """
         return self._get('/setup/wizard')
 
-    def finish_wizard(self, handled):
-        """
+    def finish_wizards(self, handled):
+        """Finish wizards
+        http://docs.octoprint.org/en/master/api/wizard.html#finish-wizards
+
         Inform wizards that the wizard dialog has been finished.
 
         Expects a JSON request body containing a property handled 

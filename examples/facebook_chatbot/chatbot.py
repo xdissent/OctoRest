@@ -179,6 +179,12 @@ class ChatBot(Flask):
                                 self.send_message(recipient_id, self.home())
                             elif text == 'toggle':
                                 self.send_message(recipient_id, self.toggle())
+                            elif text == 'pause':
+                                self.send_message(recipient_id, self.toggle())
+                            elif text == 'resume':
+                                self.send_message(recipient_id, self.toggle())
+                            elif text == 'cancel':
+                                self.send_message(recipient_id, self.toggle())
                             elif message['message'].get('text'):
                                 response_sent_text = self.get_message()
                                 self.send_message(recipient_id, response_sent_text)
