@@ -84,36 +84,40 @@ A check list of the features currently implemented can be seen below.
 * Version information
     - [X] Version information
 * Apps
-    - [ ] Session Keys (Deprecated since version 1.3.11: This functionality will be removed in 1.4.0.
-        Use the Application Keys Plugin workflow instead.)
-        - [ ] Obtaining a temporary session key
-        - [ ] Verifying a temporary session key
+    - [ ] Session Keys (Deprecated since version 1.3.11: This functionality will be removed in 1.4.0. Use the Application Keys Plugin workflow instead.)
+    
+      - [ ] Obtaining a temporary session key
+      - [ ] Verifying a temporary session key
 * Connection handling
     - [X] Get connection settings
     - [X] Issue a connection command
-        - [X] Connect
-        - [X] Disconnect
-        - [X] Fake_ack
+    
+      - [X] Connect
+      - [X] Disconnect
+      - [X] Fake_ack
 * File operations
     - [X] Retrieve all files
     - [X] Retrieve files from specific location
     - [X] Upload file or create folder
     - [X] Retrieve a specific file’s or folder’s information
     - [X] Issue a file command
-        - [X] Select
-        - [X] Slice
-        - [X] Copy
-        - [X] Move
+    
+      - [X] Select
+      - [X] Slice
+      - [X] Copy
+      - [X] Move
     - [X] Delete file
 * Job operations
     - [X] Issue a job command
+    
         - [X] Start
         - [X] Cancel
         - [X] Restart
         - [X] Pause
-            - [X] Pause
-            - [X] Resume
-            - [X] Toggle
+        
+          - [X] Pause
+          - [X] Resume
+          - [X] Toggle
     - [X] Retrieve information about the current job
 * Languages
     - [X] Retrieve installed language packs
@@ -125,28 +129,33 @@ A check list of the features currently implemented can be seen below.
 * Printer operations
     - [X] Retrieve the current printer state
     - [X] Issue a print head command
-        - [X] Jog
-        - [X] Home
-        - [X] Feedrate
+    
+      - [X] Jog
+      - [X] Home
+      - [X] Feedrate
     - [X] Issue a tool command
-        - [X] Target
-        - [X] Offset
-        - [X] Select
-        - [X] Extrude
-        - [X] Flowrate
+    
+      - [X] Target
+      - [X] Offset
+      - [X] Select
+      - [X] Extrude
+      - [X] Flowrate
     - [X] Retrieve the current tool state
     - [X] Issue a bed command
-        - [X] Target
-        - [X] Offset
+    
+      - [X] Target
+      - [X] Offset
     - [X] Retrieve the current bed state
     - [X] Issue a chamber command
-        - [X] Target
-        - [X] Offset
+    
+      - [X] Target
+      - [X] Offset
     - [X] Retrieve the current chamber state
     - [X] Issue an SD command
-        - [X] Init
-        - [X] Refresh
-        - [X] Release
+    
+      - [X] Init
+      - [X] Refresh
+      - [X] Release
     - [X] Retrieve the current SD state
     - [X] Send an arbitrary command to the printer
 * Printer profile operations
@@ -173,7 +182,8 @@ A check list of the features currently implemented can be seen below.
     - [X] Retrieve a list of timelapses and the current config
     - [X] Delete a timelapse
     - [X] Issue a command for an unrendered timelapse
-        - [X] Render
+    
+      - [X] Render
     - [X] Delete an unrendered timelapse
     - [X] Change current timelapse config
 * User
@@ -189,9 +199,10 @@ A check list of the features currently implemented can be seen below.
     - [X] Delete a user’s personal API key
 * Util
     - [X] Test paths or URLs
-        - [X] Path
-        - [X] URL
-        - [X] Server
+    
+      - [X] Path
+      - [X] URL
+      - [X] Server
 * Wizard
     - [X] Retrieve additional data about registered wizards
     - [X] Finish wizards
