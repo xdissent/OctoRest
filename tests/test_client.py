@@ -31,6 +31,7 @@ def sleep(seconds):
     # if 'RECORD' in os.environ:
     time.sleep(seconds)
 
+
 def cmd_wait(client, state):
     while client.state() == state:
         sleep(0.1)
@@ -39,6 +40,7 @@ def cmd_wait(client, state):
 def cmd_wait_until(client, state):
     while client.state() != state:
         sleep(0.1)
+
 
 def subsets(*items):
     '''
@@ -83,7 +85,7 @@ class TestClient:
             OctoRest(url=URL, apikey='nope')
 
     ### VERSION INFORMATION TESTS ###
-    
+
     def test_version(self, client):
         version = client.get_version()
         assert 'api' in version
@@ -179,7 +181,7 @@ class TestClient:
         client.cancel()
         cmd_wait(client, 'Cancelling')
         client.delete(gcode.filename)
-    
+
     def test_file_copy(self, client, gcode):
         client.upload(gcode.path)
         client.copy(gcode.filename, 'copied.gcode')
@@ -188,7 +190,7 @@ class TestClient:
         assert 'copied.gcode' in [f['name'] for f in files['files']]
         client.delete(gcode.filename)
         client.delete('copied.gcode')
-    
+
     def test_file_copy_exists(self, client, gcode):
         client.upload(gcode.path)
         client.copy(gcode.filename, 'copied.gcode')
@@ -198,8 +200,7 @@ class TestClient:
         with pytest.raises(RuntimeError):
             client.copy(gcode.filename, 'copied.gcode')
         client.delete(gcode.filename)
-        
-    
+
     def test_file_copy_folder_not_exist(self, client, gcode):
         files = client.files()
         if 'copied.gcode' in [f['name'] for f in files['files']]:
@@ -232,14 +233,14 @@ class TestClient:
         with pytest.raises(RuntimeError):
             client.copy(gcode.filename, '/random/path/moved.gcode')
         client.delete(gcode.filename)
-    
+
     def test_slice_curalegacy(self, client):
         client.slice('biscuithelper.STL', slicer='curalegacy')
         sleep(2)
         files = client.files()
         assert 'biscuithelper.gco' in [f['name'] for f in files['files']]
         client.delete('biscuithelper.gco')
-    
+
     @pytest.mark.parametrize('name', ('biscuits.gco', 'richtea.gcode'))
     def test_slice_curalegacy_gcode(self, client, name):
         client.slice('biscuithelper.STL', slicer='curalegacy', gcode=name)
@@ -247,7 +248,7 @@ class TestClient:
         files = client.files()
         assert name in [f['name'] for f in files['files']]
         client.delete(name)
-    
+
     def test_slice_curalegacy_select(self, client):
         client.slice('biscuithelper.STL', slicer='curalegacy', select=True)
         sleep(2)
@@ -281,7 +282,7 @@ class TestClient:
         client.cancel()
         cmd_wait(client, 'Cancelling')
         client.delete(gcode.filename)
-    
+
     def test_upload_print_pause_resume(self, client, gcode):
         client.upload(gcode.path)
         client.select(gcode.filename, print=True)
@@ -295,7 +296,7 @@ class TestClient:
         client.cancel()
         cmd_wait(client, 'Cancelling')
         client.delete(gcode.filename)
-    
+
     def test_upload_print_toggle(self, client, gcode):
         client.upload(gcode.path)
         client.select(gcode.filename, print=True)
@@ -343,7 +344,7 @@ class TestClient:
         assert printer['state']['flags']['ready']
         assert not printer['state']['flags']['error']
         assert not printer['state']['flags']['printing']
-    
+
     def test_printer_temps(self, client):
         printer = client.printer()
         cmd_wait_until(client, 'Operational')
@@ -501,11 +502,11 @@ class TestClient:
         new_settings = client.settings(test_name)
         assert new_settings['appearance']['name'] == 'Gandalf'
         client.settings({'appearance': {'name': printer_name}})
-    
+
     # def test_tmp_session_key(self, client):
     #     key = client.tmp_session_key()
     #     print(key)
-    
+
     def test_users(self, client):
         users = client.users()
         assert 'users' in users
@@ -542,19 +543,20 @@ class TestClient:
         client.connect()
         cmd_wait(client, 'Detecting baudrate')
         assert client.state() in ['Connecting',
-                                'Operational',
-                                'Opening serial port']
+                                  'Operational',
+                                  'Opening serial port']
         client.disconnect()
         assert client.state() in ['Offline', 'Closed']
-    
-import json
-client = OctoRest(url=URL, apikey=APIKEY)
-client.new_folder('hello')
-f = client.files(recursive=False)
-print(json.dumps(f, indent=4))
-g = client.files(recursive=True)
-print(json.dumps(f, indent=4))
-print(f == g)
-print(client.version)
-client.gcode("M106")
-client.gcode("M106 \n G28 X Y Z \n M107")
+
+
+# import json
+# client = OctoRest(url=URL, apikey=APIKEY)
+# client.new_folder('hello')
+# f = client.files(recursive=False)
+# print(json.dumps(f, indent=4))
+# g = client.files(recursive=True)
+# print(json.dumps(f, indent=4))
+# print(f == g)
+# print(client.version)
+# client.gcode("M106")
+# client.gcode("M106 \n G28 X Y Z \n M107")
