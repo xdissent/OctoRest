@@ -45,7 +45,7 @@ jobs:
           name: run octoprint
           command: |
             . venv/bin/activate
-            octoprint serve
+            octoprint serve --port 5000
           background: true
 
       # run tests!
@@ -53,6 +53,7 @@ jobs:
           name: run tests
           command: |
             . venv/bin/activate
+            sleep 10
             pytest
 
       - store_artifacts:
