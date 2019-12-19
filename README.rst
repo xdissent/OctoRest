@@ -2,9 +2,6 @@
 OctoRest 
 ===========================
 
-.. image:: https://circleci.com/gh/dougbrion/OctoRest/tree/master.svg?style=svg
-    :target: https://circleci.com/gh/dougbrion/OctoRest/tree/master
-
 Python client library for OctoPrint REST API
 
 This is continued work after the great start by Miro Hrončok of covering the
