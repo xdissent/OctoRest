@@ -2,6 +2,11 @@
 OctoRest 
 ===========================
 
+|License MIT|
+
+.. |License MIT| image:: https://img.shields.io/badge/License-MIT-yellow.svg
+   :target: https://opensource.org/licenses/MIT
+
 Python client library for OctoPrint REST API
 
 This is continued work after the great start by Miro Hrončok of covering the
