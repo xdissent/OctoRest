@@ -2,7 +2,8 @@
 OctoRest 
 ===========================
 
-|License MIT|
+.. |CircleCI| image:: https://circleci.com/gh/dougbrion/OctoRest.svg?style=svg
+    :target: https://circleci.com/gh/dougbrion/OctoRest
 
 .. |License MIT| image:: https://img.shields.io/badge/License-MIT-yellow.svg
    :target: https://opensource.org/licenses/MIT
