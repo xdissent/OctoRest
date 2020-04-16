@@ -409,13 +409,13 @@ class OctoRest:
             'select': select,
             'print': print,
         }
-        if not gcode == None:
+        if gcode is not None:
             data['gcode'] = gcode
-        if not position == None:
+        if position is not None:
             data['position'] = position
-        if not printer_profile == None:
+        if printer_profile is not None:
             data['printerProfile'] = printer_profile
-        if not profile == None:
+        if profile is not None:
             data['profile'] = profile
         return self._post('/api/files/{}'.format(location), json=data, ret=False)
     
@@ -964,6 +964,15 @@ class OctoRest:
         """
         return self._get('/api/printer/sd')
 
+    def custom_control_request(self):
+        """Retrieves the custom controls as configured in config.yaml.
+        http://docs.octoprint.org/en/master/api/printer.html#get--api-printer-command-custom
+.
+        The response will contain a list of custom control definitions.
+        A 200 OK with a List all response will be returned.
+        """
+        return self._get('/api/printer/command/custom')
+
     def gcode(self, command):
         """Send an arbitrary command to the printer
         http://docs.octoprint.org/en/master/api/printer.html#send-an-arbitrary-command-to-the-printer
@@ -1174,7 +1183,8 @@ class OctoRest:
             currently either core or custom
             action – The identifier of the command, action from its definition
         """
-        return self._post('/api/system/commands/{}/{}'.format(source, action))
+
+        return self._post('/api/system/commands/{}/{}'.format(source, action), ret=False)
     
     #################
     ### TIMELAPSE ###

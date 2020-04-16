@@ -163,6 +163,7 @@ A check list of the features currently implemented can be seen below.
       - [X] Refresh
       - [X] Release
     - [X] Retrieve the current SD state
+    - [X] Retrieve custom controls from config.yaml
     - [X] Send an arbitrary command to the printer
 * Printer profile operations
     - [X] Retrieve all printer profiles
