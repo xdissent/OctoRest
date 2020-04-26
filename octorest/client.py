@@ -24,8 +24,6 @@ class OctoRest:
         """
         if not url:
             raise TypeError('Required argument \'url\' not found or emtpy')
-        if not apikey:
-            raise TypeError('Required argument \'apikey\' not found or emtpy')
 
         parsed = urlparse.urlparse(url)
         if parsed.scheme not in ['http', 'https']:
@@ -36,11 +34,13 @@ class OctoRest:
         self.url = '{}://{}'.format(parsed.scheme, parsed.netloc)
 
         self.session = session or requests.Session()
-        self.session.headers.update({'X-Api-Key': apikey})
+        
+        if apikey:
+            self.session.headers.update({'X-Api-Key': apikey})
 
-        # Try a simple request to see if the API key works
-        # Keep the info, in case we need it later
-        self.version = self.get_version()
+            # Try a simple request to see if the API key works
+            # Keep the info, in case we need it later
+            self.version = self.get_version()
 
     def _get(self, path, params=None):
         """
