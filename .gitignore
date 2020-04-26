@@ -16,3 +16,6 @@ sdist
 
 # VS Code
 .vscode
+
+# Environments
+env/
