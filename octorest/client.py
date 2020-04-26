@@ -36,11 +36,23 @@ class OctoRest:
         self.session = session or requests.Session()
         
         if apikey:
-            self.session.headers.update({'X-Api-Key': apikey})
+            self.loadApiKey(apikey)
 
-            # Try a simple request to see if the API key works
-            # Keep the info, in case we need it later
-            self.version = self.get_version()
+    def loadApiKey(self, apiKey: str) -> None:
+        """Use the given API key for all future communication with the OctoPrint server.
+
+        Raises TypeError if 'apiKey' is None or empty.
+        Raises RuntimeError if the API key is rejected by the server.
+
+        """
+        if not apiKey:
+            raise TypeError('Required argument \'apiKey\' not found or empty')
+
+        self.session.headers.update({'X-Api-Key': apiKey})
+
+        # Try a simple request to see if the API key works
+        # Keep the info, in case we need it later
+        self.version = self.get_version()
 
     def _get(self, path, params=None):
         """
