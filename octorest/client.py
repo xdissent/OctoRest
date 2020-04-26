@@ -23,7 +23,7 @@ class OctoRest:
         If a session is provided, it will be used (mostly for testing)
         """
         if not url:
-            raise TypeError('Required argument \'url\' not found or emtpy')
+            raise TypeError('Required argument \'url\' not found or empty')
 
         parsed = urlparse.urlparse(url)
         if parsed.scheme not in ['http', 'https']:
