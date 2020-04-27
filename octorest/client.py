@@ -3,13 +3,20 @@ from contextlib import contextmanager
 from urllib import parse as urlparse
 from typing import Optional, Tuple
 from enum import Enum
+from time import sleep
 
 import requests
 
 class AuthorizationRequestPollingResult(Enum):
     STILL_WAITING = 1
     GRANTED = 2
-    NOPE = 3 # Access denied or request timed out
+    NOPE = 3 # Request denied or request timed out by the server
+
+class WorkflowAppKeyRequestResult(Enum):
+    WORKFLOW_UNSUPPORTED = 1
+    NOPE = 2 # Request denied or request timed out by the server
+    GRANTED = 3
+    TIMED_OUT = 4
 
 class OctoRest:
     """
@@ -205,6 +212,8 @@ class OctoRest:
         """Check if the Application Keys Plugin workflow is supported
         https://docs.octoprint.org/en/master/bundledplugins/appkeys.html#probe-for-workflow-support
 
+        Raises ConnectionError if the OctoPrint server could not be found.
+        
         Returns True if the workflow is supported, otherwise returns False.
         """
         url = urlparse.urljoin(self.url, '/plugin/appkeys/probe')
@@ -269,6 +278,50 @@ class OctoRest:
         else:
             raise Exception("Received response with unexpected status code")
     
+    def tryGetApiKey(self, appName: str, user: Optional[str], timeout: int = 60) -> Tuple[WorkflowAppKeyRequestResult, Optional[str]]:
+        """ Run the Application Keys Plugin Workflow
+
+        app: This parameter should be a human readable identifier to use for the application requesting access.
+        It will be displayed to the user.
+        Internally it will be used case insensitively, so `My App` and `my APP` are considered the same application identifiers.
+
+        user: The optional `user` parameter should be used to limit the authorization process to a specified user.
+        If the parameter is left unset, any user will be able to complete the authorization process and
+        grant access to the app with their account. E.g. if a user `me` starts the process in an app,
+        the app should request that name from the user and use it in the `user` parameter.
+        OctoPrint will then only display the authorization request on browsers the user `me` is logged in on.
+
+        timeout: the amount of time (in seconds) to wait for the user to approve the key request.
+
+        Raises ConnectionError if the OctoPrint server could not be found.
+
+        Returns a tuple who's first item an enum representing the result type,
+        and if the result type is GRANTED, the tuple's second item is the API key.
+        """
+        workflowSupported = self.probeAppKeysWorkflowSupport()
+
+        if not workflowSupported:
+            return (WorkflowAppKeyRequestResult.WORKFLOW_UNSUPPORTED, None)
+            
+        pollingUrl = self.startAuthorizationProcess(appName, user)
+        
+        interval = 1
+        elapsed = 0
+        
+        while elapsed < timeout:
+            (pollingResult, apikey) = self.pollAuthRequestDecision(pollingUrl)
+
+            if pollingResult == AuthorizationRequestPollingResult.NOPE:
+                return (WorkflowAppKeyRequestResult.NOPE, None)
+
+            if pollingResult == AuthorizationRequestPollingResult.GRANTED:
+                return (WorkflowAppKeyRequestResult.GRANTED, apikey)
+
+            sleep(interval)
+            elapsed += interval
+        
+        return (WorkflowAppKeyRequestResult.TIMED_OUT, None)
+
     ###########################
     ### CONNECTION HANDLING ###
     ###########################
