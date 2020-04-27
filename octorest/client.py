@@ -264,7 +264,7 @@ class OctoRest:
             return (AuthorizationRequestPollingResult.NOPE, None)
         elif response.status_code == 200:
             keyResponse = response.json()
-            apikey = keyResponse['apikey']
+            apikey = keyResponse['api_key'] # At the time of writing this, the official documentation in the link above says this key is named 'apikey', but wireshark says differently
             return (AuthorizationRequestPollingResult.GRANTED, apikey)
         else:
             raise Exception("Received response with unexpected status code")
