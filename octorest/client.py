@@ -38,17 +38,17 @@ class OctoRest:
         if apikey:
             self.loadApiKey(apikey)
 
-    def loadApiKey(self, apiKey: str) -> None:
+    def loadApiKey(self, apikey: str) -> None:
         """Use the given API key for all future communication with the OctoPrint server.
 
-        Raises TypeError if 'apiKey' is None or empty.
+        Raises TypeError if 'apikey' is None or empty.
         Raises RuntimeError if the API key is rejected by the server.
 
         """
-        if not apiKey:
-            raise TypeError('Required argument \'apiKey\' not found or empty')
+        if not apikey:
+            raise TypeError('Required argument \'apikey\' not found or empty')
 
-        self.session.headers.update({'X-Api-Key': apiKey})
+        self.session.headers.update({'X-Api-Key': apikey})
 
         # Try a simple request to see if the API key works
         # Keep the info, in case we need it later
@@ -264,8 +264,8 @@ class OctoRest:
             return (AuthorizationRequestPollingResult.NOPE, None)
         elif response.status_code == 200:
             keyResponse = response.json()
-            apiKey = keyResponse['apiKey']
-            return (AuthorizationRequestPollingResult.GRANTED, apiKey)
+            apikey = keyResponse['apikey']
+            return (AuthorizationRequestPollingResult.GRANTED, apikey)
         else:
             raise Exception("Received response with unexpected status code")
     
