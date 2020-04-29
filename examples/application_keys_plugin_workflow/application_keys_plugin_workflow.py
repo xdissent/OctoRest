@@ -11,10 +11,10 @@ def main():
     except TypeError:
         raise NotImplementedError() # Decide what should happen now
 
-    (result, apiKey) = (None, None)
+    (result, api_key) = (None, None)
 
     try:
-        (result, apiKey) = client.tryGetApiKey('my-app', user)
+        (result, api_key) = client.try_get_api_key('my-app', user)
     except ConnectionError:
         raise NotImplementedError() # Decide what should happen now. Suggestion - tell the user the OctoPrint server is unreachable and that he should check the URL entered
 
@@ -25,7 +25,7 @@ def main():
     elif result == WorkflowAppKeyRequestResult.NOPE: # The request has been denied
         raise NotImplementedError() # Decide what should happen now
     elif result == WorkflowAppKeyRequestResult.GRANTED:
-        client.loadApiKey(apiKey) # You have to load the API key before sending any requests to the OctoPrint server
+        client.load_api_key(api_key) # You have to load the API key before sending any requests to the OctoPrint server
         pass # At this point you can use the client for whatever you wish
     
     raise NotImplementedError() # Decide what should happen now

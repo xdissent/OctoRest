@@ -43,9 +43,9 @@ class OctoRest:
         self.session = session or requests.Session()
         
         if apikey:
-            self.loadApiKey(apikey)
+            self.load_api_key(apikey)
 
-    def loadApiKey(self, apikey: str) -> None:
+    def load_api_key(self, apikey: str) -> None:
         """Use the given API key for all future communication with the OctoPrint server.
 
         Raises TypeError if 'apikey' is None or empty.
@@ -208,7 +208,7 @@ class OctoRest:
     ### APPS - APPLICATION KEYS PLUGIN WORKFLOW ###
     ###############################################
 
-    def probeAppKeysWorkflowSupport(self) -> bool:
+    def probe_app_keys_workflow_support(self) -> bool:
         """Check if the Application Keys Plugin workflow is supported
         https://docs.octoprint.org/en/master/bundledplugins/appkeys.html#probe-for-workflow-support
 
@@ -224,7 +224,7 @@ class OctoRest:
         
         return False
 
-    def startAuthorizationProcess(self, app: str, user: Optional[str] = None) -> str:
+    def start_authorization_process(self, app: str, user: Optional[str] = None) -> str:
         """Starts the authorization process
         https://docs.octoprint.org/en/master/bundledplugins/appkeys.html#start-authorization-process
 
@@ -255,7 +255,7 @@ class OctoRest:
 
         return location
     
-    def pollAuthRequestDecision(self, url: str) -> Tuple[AuthorizationRequestPollingResult, Optional[str]]:
+    def poll_auth_request_decision(self, url: str) -> Tuple[AuthorizationRequestPollingResult, Optional[str]]:
         """Check for an authorization request decision
         https://docs.octoprint.org/en/master/bundledplugins/appkeys.html#poll-for-decision-on-existing-request
 
@@ -272,13 +272,13 @@ class OctoRest:
         elif response.status_code == 404:
             return (AuthorizationRequestPollingResult.NOPE, None)
         elif response.status_code == 200:
-            keyResponse = response.json()
-            apikey = keyResponse['api_key'] # At the time of writing this, the official documentation in the link above says this key is named 'apikey', but wireshark says differently
-            return (AuthorizationRequestPollingResult.GRANTED, apikey)
+            key_response = response.json()
+            api_key = key_response['api_key'] # At the time of writing this, the official documentation in the link above says this key is named 'apikey', but wireshark says differently
+            return (AuthorizationRequestPollingResult.GRANTED, api_key)
         else:
             raise Exception("Received response with unexpected status code")
     
-    def tryGetApiKey(self, appName: str, user: Optional[str], timeout: int = 60) -> Tuple[WorkflowAppKeyRequestResult, Optional[str]]:
+    def try_get_api_key(self, appName: str, user: Optional[str], timeout: int = 60) -> Tuple[WorkflowAppKeyRequestResult, Optional[str]]:
         """ Run the Application Keys Plugin Workflow
 
         app: This parameter should be a human readable identifier to use for the application requesting access.
@@ -298,24 +298,24 @@ class OctoRest:
         Returns a tuple who's first item an enum representing the result type,
         and if the result type is GRANTED, the tuple's second item is the API key.
         """
-        workflowSupported = self.probeAppKeysWorkflowSupport()
+        workflow_supported = self.probe_app_keys_workflow_support()
 
-        if not workflowSupported:
+        if not workflow_supported:
             return (WorkflowAppKeyRequestResult.WORKFLOW_UNSUPPORTED, None)
             
-        pollingUrl = self.startAuthorizationProcess(appName, user)
+        polling_url = self.start_authorization_process(appName, user)
         
         interval = 1
         elapsed = 0
         
         while elapsed < timeout:
-            (pollingResult, apikey) = self.pollAuthRequestDecision(pollingUrl)
+            (polling_result, api_key) = self.poll_auth_request_decision(polling_url)
 
-            if pollingResult == AuthorizationRequestPollingResult.NOPE:
+            if polling_result == AuthorizationRequestPollingResult.NOPE:
                 return (WorkflowAppKeyRequestResult.NOPE, None)
 
-            if pollingResult == AuthorizationRequestPollingResult.GRANTED:
-                return (WorkflowAppKeyRequestResult.GRANTED, apikey)
+            if polling_result == AuthorizationRequestPollingResult.GRANTED:
+                return (WorkflowAppKeyRequestResult.GRANTED, api_key)
 
             sleep(interval)
             elapsed += interval
