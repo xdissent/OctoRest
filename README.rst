@@ -94,6 +94,14 @@ A check list of the features currently implemented can be seen below.
     
       - [ ] Obtaining a temporary session key
       - [ ] Verifying a temporary session key
+    - [ ] Application Keys Plugin workflow
+      
+      - [X] Probe workflow support
+      - [X] Start authorization process
+      - [X] Poll for decision on existing request
+      - [ ] Decide on existing request
+      - [ ] Fetch list of existing application keys
+      - [ ] Issue an application key command
 * Connection handling
     - [X] Get connection settings
     - [X] Issue a connection command

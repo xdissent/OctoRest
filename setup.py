@@ -5,7 +5,7 @@ setup(
     name='octorest',
     version='0.3',
     description='Client library for OctoPrint REST API',
-    long_description=''.join(open('README.rst').readlines()),
+    long_description=''.join(open('README.rst', encoding='utf-8').readlines()),
     long_description_content_type='text/x-rst',
     keywords='octoprint, 3d printing',
     author='Miro Hrončok, Jiří Makarius, Douglas Brion',

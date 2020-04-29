@@ -1,8 +1,22 @@
 import os
 from contextlib import contextmanager
 from urllib import parse as urlparse
+from typing import Optional, Tuple
+from enum import Enum
+from time import sleep
 
 import requests
+
+class AuthorizationRequestPollingResult(Enum):
+    STILL_WAITING = 1
+    GRANTED = 2
+    NOPE = 3 # Request denied or request timed out by the server
+
+class WorkflowAppKeyRequestResult(Enum):
+    WORKFLOW_UNSUPPORTED = 1
+    NOPE = 2 # Request denied or request timed out by the server
+    GRANTED = 3
+    TIMED_OUT = 4
 
 class OctoRest:
     """
@@ -16,9 +30,7 @@ class OctoRest:
         If a session is provided, it will be used (mostly for testing)
         """
         if not url:
-            raise TypeError('Required argument \'url\' not found or emtpy')
-        if not apikey:
-            raise TypeError('Required argument \'apikey\' not found or emtpy')
+            raise TypeError('Required argument \'url\' not found or empty')
 
         parsed = urlparse.urlparse(url)
         if parsed.scheme not in ['http', 'https']:
@@ -29,6 +41,20 @@ class OctoRest:
         self.url = '{}://{}'.format(parsed.scheme, parsed.netloc)
 
         self.session = session or requests.Session()
+        
+        if apikey:
+            self.load_api_key(apikey)
+
+    def load_api_key(self, apikey: str) -> None:
+        """Use the given API key for all future communication with the OctoPrint server.
+
+        Raises TypeError if 'apikey' is None or empty.
+        Raises RuntimeError if the API key is rejected by the server.
+
+        """
+        if not apikey:
+            raise TypeError('Required argument \'apikey\' not found or empty')
+
         self.session.headers.update({'X-Api-Key': apikey})
 
         # Try a simple request to see if the API key works
@@ -177,7 +203,125 @@ class OctoRest:
         Use the Application Keys Plugin workflow instead.
         """
         return self._post('/apps/auth')
+
+    ###############################################
+    ### APPS - APPLICATION KEYS PLUGIN WORKFLOW ###
+    ###############################################
+
+    def probe_app_keys_workflow_support(self) -> bool:
+        """Check if the Application Keys Plugin workflow is supported
+        https://docs.octoprint.org/en/master/bundledplugins/appkeys.html#probe-for-workflow-support
+
+        Raises ConnectionError if the OctoPrint server could not be found.
+        
+        Returns True if the workflow is supported, otherwise returns False.
+        """
+        url = urlparse.urljoin(self.url, '/plugin/appkeys/probe')
+        response = self.session.get(url)
+        
+        if response.status_code == 204:
+            return True
+        
+        return False
+
+    def start_authorization_process(self, app: str, user: Optional[str] = None) -> str:
+        """Starts the authorization process
+        https://docs.octoprint.org/en/master/bundledplugins/appkeys.html#start-authorization-process
+
+        app: This parameter should be a human readable identifier to use for the application requesting access.
+        It will be displayed to the user.
+        Internally it will be used case insensitively, so `My App` and `my APP` are considered the same application identifiers.
+
+        user: The optional `user` parameter should be used to limit the authorization process to a specified user.
+        If the parameter is left unset, any user will be able to complete the authorization process and
+        grant access to the app with their account. E.g. if a user `me` starts the process in an app,
+        the app should request that name from the user and use it in the `user` parameter.
+        OctoPrint will then only display the authorization request on browsers the user `me` is logged in on.
+
+        Raises a RuntimeError when the server response does not indicate that the authorization process started.
+
+        Returns the polling URL.
+        """
+        data = {'app': app}
+        
+        if user:
+            data['user'] = user
+            
+        url = urlparse.urljoin(self.url, '/plugin/appkeys/request')
+        response = self.session.post(url, json=data)
+        self._check_response(response)
+
+        location = response.headers['Location']
+
+        return location
     
+    def poll_auth_request_decision(self, url: str) -> Tuple[AuthorizationRequestPollingResult, Optional[str]]:
+        """Check for an authorization request decision
+        https://docs.octoprint.org/en/master/bundledplugins/appkeys.html#poll-for-decision-on-existing-request
+
+        url: The polling url received from OctoRest.startAuthorizationProcess()
+        
+        Returns a tuple who's first item an enum representing the result type,
+        and if the result type is GRANTED, the tuple's second item is the API key.
+        """
+        
+        response = self.session.get(url)
+        
+        if response.status_code == 202:
+            return (AuthorizationRequestPollingResult.STILL_WAITING, None)
+        elif response.status_code == 404:
+            return (AuthorizationRequestPollingResult.NOPE, None)
+        elif response.status_code == 200:
+            key_response = response.json()
+            api_key = key_response['api_key'] # At the time of writing this, the official documentation in the link above says this key is named 'apikey', but wireshark says differently
+            return (AuthorizationRequestPollingResult.GRANTED, api_key)
+        else:
+            raise Exception("Received response with unexpected status code")
+    
+    def try_get_api_key(self, appName: str, user: Optional[str], timeout: int = 60) -> Tuple[WorkflowAppKeyRequestResult, Optional[str]]:
+        """ Run the Application Keys Plugin Workflow
+
+        app: This parameter should be a human readable identifier to use for the application requesting access.
+        It will be displayed to the user.
+        Internally it will be used case insensitively, so `My App` and `my APP` are considered the same application identifiers.
+
+        user: The optional `user` parameter should be used to limit the authorization process to a specified user.
+        If the parameter is left unset, any user will be able to complete the authorization process and
+        grant access to the app with their account. E.g. if a user `me` starts the process in an app,
+        the app should request that name from the user and use it in the `user` parameter.
+        OctoPrint will then only display the authorization request on browsers the user `me` is logged in on.
+
+        timeout: the amount of time (in seconds) to wait for the user to approve the key request.
+
+        Raises ConnectionError if the OctoPrint server could not be found.
+
+        Returns a tuple who's first item an enum representing the result type,
+        and if the result type is GRANTED, the tuple's second item is the API key.
+        """
+        workflow_supported = self.probe_app_keys_workflow_support()
+
+        if not workflow_supported:
+            return (WorkflowAppKeyRequestResult.WORKFLOW_UNSUPPORTED, None)
+            
+        polling_url = self.start_authorization_process(appName, user)
+        
+        interval = 1
+        elapsed = 0
+        
+        while elapsed < timeout:
+            (polling_result, api_key) = self.poll_auth_request_decision(polling_url)
+
+            if polling_result == AuthorizationRequestPollingResult.NOPE:
+                return (WorkflowAppKeyRequestResult.NOPE, None)
+
+            if polling_result == AuthorizationRequestPollingResult.GRANTED:
+                return (WorkflowAppKeyRequestResult.GRANTED, api_key)
+
+            sleep(interval)
+            elapsed += interval
+        
+        return (WorkflowAppKeyRequestResult.TIMED_OUT, None)
+
     ###########################
     ### CONNECTION HANDLING ###
     ###########################
