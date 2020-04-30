@@ -175,6 +175,7 @@ A check list of the features currently implemented can be seen below.
     - [X] Send an arbitrary command to the printer
 * Printer profile operations
     - [X] Retrieve all printer profiles
+    - [X] Retrieve specific printer profile
     - [ ] Add a new printer profile
     - [ ] Update an existing printer profile
     - [X] Remove an existing printer profile
