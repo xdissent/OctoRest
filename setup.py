@@ -17,7 +17,7 @@ setup(
     setup_requires=['pytest-runner'],
     tests_require=['pytest', 'betamax-serializers', 'betamax'],
     classifiers=[
-        'Development Status :: 4 - Alpha',
+        'Development Status :: 3 - Alpha',
         'Intended Audience :: Developers',
         'Intended Audience :: Manufacturing',
         'Intended Audience :: Science/Research',
