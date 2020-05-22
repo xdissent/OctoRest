@@ -3,7 +3,7 @@ from setuptools import setup, find_packages, Extension
 
 setup(
     name='octorest',
-    version='0.3',
+    version='0.4',
     description='Client library for OctoPrint REST API',
     long_description=''.join(open('README.rst', encoding='utf-8').readlines()),
     long_description_content_type='text/x-rst',
@@ -17,7 +17,7 @@ setup(
     setup_requires=['pytest-runner'],
     tests_require=['pytest', 'betamax-serializers', 'betamax'],
     classifiers=[
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 4 - Alpha',
         'Intended Audience :: Developers',
         'Intended Audience :: Manufacturing',
         'Intended Audience :: Science/Research',
@@ -36,5 +36,5 @@ setup(
         'Topic :: Printing',
         'Topic :: Software Development :: Libraries',
         'Topic :: System :: Networking :: Monitoring',
-        ]
+    ]
 )

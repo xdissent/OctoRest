@@ -2,12 +2,6 @@
 OctoRest 
 ===========================
 
-.. |CircleCI| image:: https://circleci.com/gh/dougbrion/OctoRest.svg?style=svg
-    :target: https://circleci.com/gh/dougbrion/OctoRest
-
-.. |License MIT| image:: https://img.shields.io/badge/License-MIT-yellow.svg
-   :target: https://opensource.org/licenses/MIT
-
 Python client library for OctoPrint REST API
 
 This is continued work after the great start by Miro Hrončok of covering the
