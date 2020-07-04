@@ -52,4 +52,4 @@ class WebSocketEventHandler(SockJSClient):
         Sends data, currently not working properly.
         OctoPrint server is unable to parse.
         """
-        self.socket.send(json.dumps(data))
+        self.socket.send(json.dumps([json.dumps(data)]))

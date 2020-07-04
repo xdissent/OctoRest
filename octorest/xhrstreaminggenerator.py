@@ -64,5 +64,5 @@ class XHRStreamingGenerator:
         OctoPrint server returns 404
         """
         url = '/'.join((self.url, 'xhr_send'))
-        response = self.session.post(url, data=json.dumps(data))
+        response = self.session.post(url, data=json.dumps([json.dumps(data)]))
         return response
